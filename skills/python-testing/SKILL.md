@@ -353,7 +353,6 @@ markers =
     slow: marks tests as slow
     integration: marks tests as integration tests
     unit: marks tests as unit tests
-    django: marks tests as requiring Django
 ```
 
 ## Mocking and Patching

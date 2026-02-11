@@ -1,4 +1,4 @@
-**Language:** English | [繁體中文](docs/zh-TW/README.md)
+**Language:** English
 
 # Everything Claude Code
 
@@ -19,9 +19,9 @@
 
 <div align="center">
 
-**🌐 Language / 语言 / 語言**
+**🌐 Language**
 
-[**English**](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](docs/zh-TW/README.md)
+[**English**](README.md)
 
 </div>
 
@@ -78,7 +78,6 @@ This repo is the raw code only. The guides explain everything.
 - **Interactive installation wizard** — New `configure-ecc` skill provides guided setup with merge/overwrite detection
 - **PM2 & multi-agent orchestration** — 6 new commands (`/pm2`, `/multi-plan`, `/multi-execute`, `/multi-backend`, `/multi-frontend`, `/multi-workflow`) for managing complex multi-service workflows
 - **Multi-language rules architecture** — Rules restructured from flat files into `common/` + `typescript/` + `python/` + `golang/` directories. Install only the languages you need
-- **Chinese (zh-CN) translations** — Complete translation of all agents, commands, skills, and rules (80+ files)
 - **GitHub Sponsors support** — Sponsor the project via GitHub Sponsors
 - **Enhanced CONTRIBUTING.md** — Detailed PR templates for each contribution type
 
@@ -218,10 +217,6 @@ everything-claude-code/
 |   |-- verification-loop/          # Continuous verification (Longform Guide)
 |   |-- golang-patterns/            # Go idioms and best practices
 |   |-- golang-testing/             # Go testing patterns, TDD, benchmarks
-|   |-- django-patterns/            # Django patterns, models, views (NEW)
-|   |-- django-security/            # Django security best practices (NEW)
-|   |-- django-tdd/                 # Django TDD workflow (NEW)
-|   |-- django-verification/        # Django verification loops (NEW)
 |   |-- python-patterns/            # Python idioms and best practices (NEW)
 |   |-- python-testing/             # Python testing with pytest (NEW)
 |   |-- springboot-patterns/        # Java Spring Boot patterns (NEW)
@@ -618,7 +613,7 @@ OpenCode's plugin system is MORE sophisticated than Claude Code with 20+ event t
 
 **Additional OpenCode events**: `file.edited`, `file.watcher.updated`, `message.updated`, `lsp.client.diagnostics`, `tui.toast.show`, and more.
 
-### Available Commands (24)
+### Available Commands (25)
 
 | Command | Description |
 |---------|-------------|
@@ -640,6 +635,7 @@ OpenCode's plugin system is MORE sophisticated than Claude Code with 20+ event t
 | `/go-review` | Go code review |
 | `/go-test` | Go TDD workflow |
 | `/go-build` | Fix Go build errors |
+| `/draft-pr` | Commit, push, and open draft PR |
 | `/skill-create` | Generate skills from git |
 | `/instinct-status` | View learned instincts |
 | `/instinct-import` | Import instincts |

@@ -47,7 +47,7 @@ opencode
 | go-build-resolver | Go build errors |
 | database-reviewer | Database optimization |
 
-### Commands (24)
+### Commands (25)
 
 | Command | Description |
 |---------|-------------|
@@ -70,6 +70,7 @@ opencode
 | `/go-review` | Go code review |
 | `/go-test` | Go TDD |
 | `/go-build` | Go build fix |
+| `/draft-pr` | Commit + push + draft PR |
 | `/skill-create` | Generate skills |
 | `/instinct-status` | View instincts |
 | `/instinct-import` | Import instincts |

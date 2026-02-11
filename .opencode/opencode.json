@@ -257,6 +257,10 @@
       "description": "Configure package manager",
       "template": "{file:.opencode/commands/setup-pm.md}\n\n$ARGUMENTS"
     },
+    "draft-pr": {
+      "description": "Commit, push, and open draft PR",
+      "template": "{file:.opencode/commands/draft-pr.md}\n\n$ARGUMENTS"
+    },
     "go-review": {
       "description": "Go code review",
       "template": "{file:.opencode/commands/go-review.md}\n\n$ARGUMENTS",
