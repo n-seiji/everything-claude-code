@@ -28,5 +28,8 @@ private/
 # Session templates (not committed)
 examples/sessions/*.tmp
 
+# Claude local settings (machine-specific)
+.claude/settings.local.json
+
 # Local drafts
 marketing/

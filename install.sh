@@ -1,51 +1,113 @@
 #!/usr/bin/env bash
-# install.sh — Install claude rules while preserving directory structure.
+# install.sh — Install claude settings, commands, and rules.
 #
 # Usage:
-#   ./install.sh <language> [<language> ...]
+#   ./install.sh                    → settings + commands only
+#   ./install.sh <language> [...]   → settings + commands + rules
 #
 # Examples:
+#   ./install.sh
 #   ./install.sh typescript
 #   ./install.sh typescript python golang
 #
-# This script copies rules into ~/.claude/rules/ keeping the common/ and
-# language-specific subdirectories intact so that:
-#   1. Files with the same name in common/ and <language>/ don't overwrite
-#      each other.
-#   2. Relative references (e.g. ../common/coding-style.md) remain valid.
+# Installs:
+#   1. Settings   → ~/.claude/settings.json (symlink)
+#   2. Plugins    → ~/.claude/plugins/config.json (symlink),
+#                    ~/.claude/plugins/installed_plugins.json (copy if missing)
+#   3. Local conf → ~/.claude/settings.local.json (copy from example if missing)
+#   4. Commands   → ~/.claude/commands/ (symlinks)
+#   5. Rules      → ~/.claude/rules/ (copy, requires language argument)
 
 set -euo pipefail
 
-RULES_DIR="$(cd "$(dirname "$0")/rules" && pwd)"
-DEST_DIR="${CLAUDE_RULES_DIR:-$HOME/.claude/rules}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CLAUDE_DIR="$HOME/.claude"
 
-if [[ $# -eq 0 ]]; then
-    echo "Usage: $0 <language> [<language> ...]"
-    echo ""
-    echo "Available languages:"
-    for dir in "$RULES_DIR"/*/; do
-        name="$(basename "$dir")"
-        [[ "$name" == "common" ]] && continue
-        echo "  - $name"
-    done
-    exit 1
-fi
+# ── Helpers ──────────────────────────────────────────────────────
 
-# Always install common rules
-echo "Installing common rules -> $DEST_DIR/common/"
-mkdir -p "$DEST_DIR/common"
-cp -r "$RULES_DIR/common/." "$DEST_DIR/common/"
+link_file() {
+  local src="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  if [ -f "$dest" ] && [ ! -L "$dest" ]; then
+    echo "  backup: $dest -> ${dest}.bak"
+    mv "$dest" "${dest}.bak"
+  fi
+  [ -L "$dest" ] && rm "$dest"
+  ln -s "$src" "$dest"
+  echo "  link: $dest -> $src"
+}
 
-# Install each requested language
-for lang in "$@"; do
+copy_if_missing() {
+  local src="$1"
+  local dest="$2"
+  mkdir -p "$(dirname "$dest")"
+  # Remove broken symlinks
+  [ -L "$dest" ] && rm "$dest"
+  if [ -e "$dest" ]; then
+    echo "  skip: $dest (already exists)"
+    return
+  fi
+  cp "$src" "$dest"
+  echo "  copy: $src -> $dest"
+}
+
+# ── 1. Settings ──────────────────────────────────────────────────
+
+echo "Installing Claude settings..."
+link_file "$SCRIPT_DIR/.claude/settings.json" "$CLAUDE_DIR/settings.json"
+
+# ── 2. Plugins ───────────────────────────────────────────────────
+
+echo "Installing plugins config..."
+link_file "$SCRIPT_DIR/.claude/plugins/config.json" "$CLAUDE_DIR/plugins/config.json"
+copy_if_missing "$SCRIPT_DIR/.claude/plugins/installed_plugins.json" "$CLAUDE_DIR/plugins/installed_plugins.json"
+
+# ── 3. Local settings ───────────────────────────────────────────
+
+echo "Installing local settings..."
+copy_if_missing "$SCRIPT_DIR/.claude/settings.local.json.example" "$CLAUDE_DIR/settings.local.json"
+
+# ── 4. Commands ──────────────────────────────────────────────────
+
+COMMANDS_SRC="$SCRIPT_DIR/commands"
+COMMANDS_DEST="$CLAUDE_DIR/commands"
+
+echo "Installing commands..."
+mkdir -p "$COMMANDS_DEST"
+for cmd in "$COMMANDS_SRC"/*.md; do
+  [ -f "$cmd" ] || continue
+  name="$(basename "$cmd")"
+  dest="$COMMANDS_DEST/$name"
+  [ -L "$dest" ] && rm "$dest"
+  if [ -f "$dest" ] && [ ! -L "$dest" ]; then
+    mv "$dest" "${dest}.bak"
+  fi
+  ln -s "$cmd" "$dest"
+done
+echo "  linked: $COMMANDS_SRC/*.md -> $COMMANDS_DEST/"
+
+# ── 5. Rules (optional) ─────────────────────────────────────────
+
+if [[ $# -gt 0 ]]; then
+  RULES_DIR="$SCRIPT_DIR/rules"
+  DEST_DIR="${CLAUDE_RULES_DIR:-$CLAUDE_DIR/rules}"
+
+  echo "Installing common rules -> $DEST_DIR/common/"
+  mkdir -p "$DEST_DIR/common"
+  cp -r "$RULES_DIR/common/." "$DEST_DIR/common/"
+
+  for lang in "$@"; do
     lang_dir="$RULES_DIR/$lang"
     if [[ ! -d "$lang_dir" ]]; then
-        echo "Warning: rules/$lang/ does not exist, skipping." >&2
-        continue
+      echo "Warning: rules/$lang/ does not exist, skipping." >&2
+      continue
     fi
     echo "Installing $lang rules -> $DEST_DIR/$lang/"
     mkdir -p "$DEST_DIR/$lang"
     cp -r "$lang_dir/." "$DEST_DIR/$lang/"
-done
+  done
+fi
 
-echo "Done. Rules installed to $DEST_DIR/"
+echo ""
+echo "Done."
