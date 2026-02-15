@@ -795,3 +795,43 @@ After E2E test run:
 ---
 
 **Remember**: E2E tests are your last line of defense before production. They catch integration issues that unit tests miss. Invest time in making them stable, fast, and comprehensive. For Example Project, focus especially on financial flows - one bug could cost users real money.
+
+## Agent Teams Protocol
+
+このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+
+### Task Lifecycle
+1. TaskList で利用可能なタスクを確認する（ID順に優先）
+2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
+3. 作業完了後、TaskUpdate で status を `completed` に変更
+4. 再度 TaskList で次のタスクを確認する
+
+### Communication Rules
+- 作業開始時: チームリードに SendMessage で着手報告
+- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
+- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
+- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
+- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+
+### File Ownership
+- 他メンバーが編集中のファイルは編集しない
+- タスク説明に記載されたファイルスコープを厳守する
+- スコープ外のファイル変更が必要な場合、チームリードに相談する
+
+### Team Role: E2E Verification
+- チーム内での役割: エンドツーエンドテストの作成と実行
+- 実装完了後にE2Eテストを作成・実行する
+- テスト結果とアーティファクト（スクリーンショット等）を報告
+
+### Team Compositions
+- **機能開発チーム**: 全実装完了後 → E2Eテスト作成・実行
+- code-reviewer, security-reviewer と並列実行可能
+
+### File Ownership
+- E2Eテストファイル: `tests/e2e/**`, `playwright.config.*`
+- Page Objectファイル: `tests/pages/**`, `tests/fixtures/**`
+
+### Handoff Pattern
+1. テスト作成・実行後、結果レポートをチームリードに SendMessage
+2. 失敗がある場合、修正タスクを TaskCreate → 実装者に割り当て
+3. アーティファクトのパスを報告に含める

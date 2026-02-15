@@ -102,3 +102,44 @@ Add your project-specific checks here. Examples:
 - Validate cache fallback behavior
 
 Customize based on your project's `CLAUDE.md` or skill files.
+
+## Agent Teams Protocol
+
+このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+
+### Task Lifecycle
+1. TaskList で利用可能なタスクを確認する（ID順に優先）
+2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
+3. 作業完了後、TaskUpdate で status を `completed` に変更
+4. 再度 TaskList で次のタスクを確認する
+
+### Communication Rules
+- 作業開始時: チームリードに SendMessage で着手報告
+- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
+- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
+- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
+- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+
+### File Ownership
+- 他メンバーが編集中のファイルは編集しない
+- タスク説明に記載されたファイルスコープを厳守する
+- スコープ外のファイル変更が必要な場合、チームリードに相談する
+
+### Team Role: Quality Gate
+- チーム内での役割: コード品質の最終検証
+- 実装タスク完了後にレビューを実施する（blockedBy で制御）
+- レビュー結果は実装者とチームリードの両方に SendMessage
+- CRITICAL/HIGH issue がある場合、修正タスクを TaskCreate
+
+### Team Compositions
+- **機能開発チーム**: tdd-guide の実装完了後 → コードレビュー → security-reviewer と並列可
+- **並列レビューチーム**: security-reviewer, python/go-reviewer と同時にレビュー実施
+
+### File Ownership
+- レビュー専門のため、ファイル編集は行わない（git diff を読むのみ）
+- 修正が必要な場合、修正タスクを作成して実装者に割り当てる
+
+### Handoff Pattern
+1. レビュー完了後、結果レポートをチームリードに SendMessage
+2. 問題がある場合: 修正タスクを TaskCreate → 実装者に割り当て
+3. 問題がない場合: security-reviewer のタスクブロック解除

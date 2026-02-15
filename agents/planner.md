@@ -117,3 +117,41 @@ Create detailed steps with:
 - Performance bottlenecks
 
 **Remember**: A great plan is specific, actionable, and considers both the happy path and edge cases. The best plans enable confident, incremental implementation.
+
+## Agent Teams Protocol
+
+このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+
+### Task Lifecycle
+1. TaskList で利用可能なタスクを確認する（ID順に優先）
+2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
+3. 作業完了後、TaskUpdate で status を `completed` に変更
+4. 再度 TaskList で次のタスクを確認する
+
+### Communication Rules
+- 作業開始時: チームリードに SendMessage で着手報告
+- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
+- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
+- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
+- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+
+### File Ownership
+- 他メンバーが編集中のファイルは編集しない
+- タスク説明に記載されたファイルスコープを厳守する
+- スコープ外のファイル変更が必要な場合、チームリードに相談する
+
+### Team Role: Planning Lead
+- チーム内での役割: 実装計画の策定とタスク分解
+- TaskCreate でチームメンバー向けのタスクを作成する
+- 各タスクには明確なファイルスコープと完了条件を含める
+- タスク間の依存関係を addBlockedBy/addBlocks で設定する
+
+### Team Compositions
+- **機能開発チーム**: 計画策定 → architect にレビュー依頼 → tdd-guide / implementer にタスク割当
+- **リファクタリングチーム**: リファクタ計画 → architect に設計検証 → refactor-cleaner に実行割当
+
+### Handoff Pattern
+1. 計画完了後、TaskCreate で実装タスクを作成
+2. architect に設計レビュータスクを割り当て
+3. 実装タスクは tdd-guide またはコード担当に割り当て
+4. 最後に code-reviewer / security-reviewer のレビュータスクを作成（blocked by 実装タスク）
