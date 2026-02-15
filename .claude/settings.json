@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Grep",
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:docs.github.com)",
@@ -21,6 +22,7 @@
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:ghostty.org)",
       "Bash(grep *)",
+      "Bash(head *)",
       "Bash(find *)",
       "Bash(ls *)",
       "Bash(pwd)",
