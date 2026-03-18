@@ -14,7 +14,7 @@ description: Commit, push, and open a draft PR
 
 Based on the above changes:
 
-1. Create a new branch if on main
+1. Create a new branch if on main or develop
 2. Stage all relevant changed files with `git add`
 3. Create a single commit with an appropriate message following conventional commits format (feat, fix, refactor, docs, test, chore, perf, ci)
 4. Push the branch to origin

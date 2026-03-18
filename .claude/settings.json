@@ -1,7 +1,6 @@
 {
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1"
   },
   "permissions": {
@@ -111,9 +110,10 @@
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
-    "everything-claude-code": true
+    "superpowers@claude-plugins-official": true
   },
   "language": "japanese",
   "alwaysThinkingEnabled": true,
+  "voiceEnabled": true,
   "effortLevel": "medium"
 }
