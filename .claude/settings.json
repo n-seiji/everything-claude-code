@@ -110,10 +110,14 @@
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
+    "superpowers@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "notion@claude-plugins-official": true,
+    "figma@claude-plugins-official": true
   },
   "language": "japanese",
   "alwaysThinkingEnabled": true,
-  "voiceEnabled": true,
-  "effortLevel": "medium"
+  "effortLevel": "medium",
+  "voiceEnabled": true
 }
