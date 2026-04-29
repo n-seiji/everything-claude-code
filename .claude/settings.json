@@ -149,11 +149,13 @@
     "pr-review-toolkit@claude-plugins-official": true,
     "data-agent-kit-starter-pack@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "cloudflare@claude-plugins-official": true
   },
   "language": "japanese",
   "alwaysThinkingEnabled": true,
   "effortLevel": "xhigh",
   "voiceEnabled": true,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "editorMode": "vim"
 }
