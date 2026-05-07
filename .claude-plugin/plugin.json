@@ -1,26 +1,22 @@
 {
   "name": "everything-claude-code",
   "version": "1.4.1",
-  "description": "Complete collection of battle-tested Claude Code configs from an Anthropic hackathon winner - agents, skills, hooks, and rules evolved over 10+ months of intensive daily use",
+  "description": "n-seiji's Claude Code plugin: agents, skills, hooks, and commands (fork of affaan-m/everything-claude-code)",
   "author": {
-    "name": "Affaan Mustafa",
-    "url": "https://x.com/affaanmustafa"
+    "name": "Affaan Mustafa (forked by n-seiji)"
   },
-  "homepage": "https://github.com/affaan-m/everything-claude-code",
-  "repository": "https://github.com/affaan-m/everything-claude-code",
+  "homepage": "https://github.com/n-seiji/everything-claude-code",
+  "repository": "https://github.com/n-seiji/everything-claude-code",
   "license": "MIT",
   "keywords": [
     "claude-code",
     "agents",
     "skills",
     "hooks",
-    "rules",
     "tdd",
     "code-review",
     "security",
-    "workflow",
-    "automation",
-    "best-practices"
+    "workflow"
   ],
   "skills": ["./skills/", "./commands/"],
   "agents": [
