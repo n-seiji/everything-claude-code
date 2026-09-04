@@ -268,6 +268,8 @@ Review with the mindset: "Would this code pass review at Google or a top Go shop
 
 ## Agent Teams Protocol
 
+TaskList, TaskUpdate, TaskCreate, and SendMessage are the Claude Code Agent Teams tools; this section applies only when the agent runs as a team member.
+
 When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
@@ -287,6 +289,8 @@ When this agent operates as a team member, follow this protocol.
 - Do not edit files another member is currently editing.
 - Strictly follow the file scope stated in the task description.
 - If a change outside the scope is needed, consult the team lead.
+- Being review-only, this agent does not edit files.
+- If a fix is needed, create a fix task with TaskCreate and assign it to the implementing agent.
 
 ### Team Role: Go Quality Gate
 - Role in the team: verify Go code quality and concurrency safety.
@@ -295,10 +299,6 @@ When this agent operates as a team member, follow this protocol.
 
 ### Team Compositions
 - **Parallel review team**: review simultaneously with code-reviewer + security-reviewer.
-
-### File Ownership
-- Being review-only, this agent does not edit files.
-- TaskCreate a fix task and assign it to the implementer.
 
 ### Handoff Pattern
 1. After the review, SendMessage Go-specific issues to the team lead.

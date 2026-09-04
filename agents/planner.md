@@ -120,6 +120,8 @@ Create detailed steps with:
 
 ## Agent Teams Protocol
 
+TaskList, TaskUpdate, TaskCreate, and SendMessage are the Claude Code Agent Teams tools; this section applies only when the agent runs as a team member.
+
 When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle

@@ -7,6 +7,8 @@ description: Use when the user says 「動作確認して」「スクショ撮�
 
 A workflow that verifies a running web app in real Chrome via the `ui-verifier` subagent, and records measured results in a PR / report.
 
+Prerequisites: the Claude in Chrome extension connected to a logged-in browser, and the `ui-verifier` agent from this plugin. If the extension is not connected, stop and tell the user (Playwright MCP is a possible fallback).
+
 ## When to use it / when not to
 
 - Use it for things you can only learn by actually rendering and interacting: layout breakage, focus movement, dialog open/close, routing transitions

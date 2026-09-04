@@ -1,6 +1,6 @@
 ---
 name: golang-patterns
-description: Idiomatic Go patterns, best practices, and conventions for building robust, efficient, and maintainable Go applications.
+description: Use when writing, reviewing, or refactoring Go code: error wrapping, context propagation, goroutine lifecycles, interfaces, package layout.
 ---
 
 # Go Development Patterns
@@ -16,33 +16,7 @@ Idiomatic Go patterns and best practices for building robust, efficient, and mai
 
 ## Core Principles
 
-### 1. Simplicity and Clarity
-
-Go favors simplicity over cleverness. Code should be obvious and easy to read.
-
-```go
-// Good: Clear and direct
-func GetUser(id string) (*User, error) {
-    user, err := db.FindUser(id)
-    if err != nil {
-        return nil, fmt.Errorf("get user %s: %w", id, err)
-    }
-    return user, nil
-}
-
-// Bad: Overly clever
-func GetUser(id string) (*User, error) {
-    return func() (*User, error) {
-        if u, e := db.FindUser(id); e == nil {
-            return u, nil
-        } else {
-            return nil, e
-        }
-    }()
-}
-```
-
-### 2. Make the Zero Value Useful
+### Make the Zero Value Useful
 
 Design types so their zero value is immediately usable without initialization.
 
@@ -69,7 +43,7 @@ type BadCounter struct {
 }
 ```
 
-### 3. Accept Interfaces, Return Structs
+### Accept Interfaces, Return Structs
 
 Functions should accept interface parameters and return concrete types.
 
@@ -171,27 +145,6 @@ _ = writer.Close() // Best-effort cleanup, error logged elsewhere
 ```
 
 ## Concurrency Patterns
-
-### Worker Pool
-
-```go
-func WorkerPool(jobs <-chan Job, results chan<- Result, numWorkers int) {
-    var wg sync.WaitGroup
-
-    for i := 0; i < numWorkers; i++ {
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            for job := range jobs {
-                results <- process(job)
-            }
-        }()
-    }
-
-    wg.Wait()
-    close(results)
-}
-```
 
 ### Context for Cancellation and Timeouts
 
@@ -384,20 +337,6 @@ myproject/
 └── Makefile
 ```
 
-### Package Naming
-
-```go
-// Good: Short, lowercase, no underscores
-package http
-package json
-package user
-
-// Bad: Verbose, mixed case, or redundant
-package httpHandler
-package json_parser
-package userService // Redundant 'Service' suffix
-```
-
 ### Avoid Package-Level State
 
 ```go
@@ -462,34 +401,6 @@ server := NewServer(":8080",
 )
 ```
 
-### Embedding for Composition
-
-```go
-type Logger struct {
-    prefix string
-}
-
-func (l *Logger) Log(msg string) {
-    fmt.Printf("[%s] %s\n", l.prefix, msg)
-}
-
-type Server struct {
-    *Logger // Embedding - Server gets Log method
-    addr    string
-}
-
-func NewServer(addr string) *Server {
-    return &Server{
-        Logger: &Logger{prefix: "SERVER"},
-        addr:   addr,
-    }
-}
-
-// Usage
-s := NewServer(":8080")
-s.Log("Starting...") // Calls embedded Logger.Log
-```
-
 ## Memory and Performance
 
 ### Preallocate Slices When Size is Known
@@ -511,58 +422,6 @@ func processItems(items []Item) []Result {
         results = append(results, process(item))
     }
     return results
-}
-```
-
-### Use sync.Pool for Frequent Allocations
-
-```go
-var bufferPool = sync.Pool{
-    New: func() interface{} {
-        return new(bytes.Buffer)
-    },
-}
-
-func ProcessRequest(data []byte) []byte {
-    buf := bufferPool.Get().(*bytes.Buffer)
-    defer func() {
-        buf.Reset()
-        bufferPool.Put(buf)
-    }()
-
-    buf.Write(data)
-    // Process...
-    return buf.Bytes()
-}
-```
-
-### Avoid String Concatenation in Loops
-
-```go
-// Bad: Creates many string allocations
-func join(parts []string) string {
-    var result string
-    for _, p := range parts {
-        result += p + ","
-    }
-    return result
-}
-
-// Good: Single allocation with strings.Builder
-func join(parts []string) string {
-    var sb strings.Builder
-    for i, p := range parts {
-        if i > 0 {
-            sb.WriteString(",")
-        }
-        sb.WriteString(p)
-    }
-    return sb.String()
-}
-
-// Best: Use standard library
-func join(parts []string) string {
-    return strings.Join(parts, ",")
 }
 ```
 

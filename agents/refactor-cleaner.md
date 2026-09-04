@@ -97,30 +97,18 @@ Create/update `docs/DELETION_LOG.md` with this structure:
 
 ### Unused Dependencies Removed
 - package-name@version - Last used: never, Size: XX KB
-- another-package@version - Replaced by: better-package
 
 ### Unused Files Deleted
 - src/old-component.tsx - Replaced by: src/new-component.tsx
-- lib/deprecated-util.ts - Functionality moved to: lib/utils.ts
 
 ### Duplicate Code Consolidated
-- src/components/Button1.tsx + Button2.tsx → Button.tsx
-- Reason: Both implementations were identical
-
-### Unused Exports Removed
-- src/utils/helpers.ts - Functions: foo(), bar()
-- Reason: No references found in codebase
+- src/components/Button1.tsx + Button2.tsx → Button.tsx (identical impls)
 
 ### Impact
-- Files deleted: 15
-- Dependencies removed: 5
-- Lines of code removed: 2,300
-- Bundle size reduction: ~45 KB
+- Files deleted: 15, Dependencies removed: 5, LOC removed: 2,300
 
 ### Testing
-- All unit tests passing: ✓
-- All integration tests passing: ✓
-- Manual testing completed: ✓
+- Unit/integration tests passing: ✓ | Manual testing: ✓
 ```
 
 ## Safety Checklist
@@ -144,73 +132,16 @@ After each removal:
 
 ## Common Patterns to Remove
 
-### 1. Unused Imports
-```typescript
-// ❌ Remove unused imports
-import { useState, useEffect, useMemo } from 'react' // Only useState used
+- **Unused imports** - keep only what's used: `import { useState } from 'react'`
+- **Dead code branches** - unreachable code (`if (false) {...}`), unused exported functions with no references
+- **Duplicate components** - e.g. `Button.tsx` + `PrimaryButton.tsx` + `NewButton.tsx` → consolidate to one with a variant prop
+- **Unused dependencies** - packages in `package.json` never imported, or replaced by another package already in use
 
-// ✅ Keep only what's used
-import { useState } from 'react'
-```
+## Project-Specific Checks
 
-### 2. Dead Code Branches
-```typescript
-// ❌ Remove unreachable code
-if (false) {
-  // This never executes
-  doSomething()
-}
-
-// ❌ Remove unused functions
-export function unusedHelper() {
-  // No references in codebase
-}
-```
-
-### 3. Duplicate Components
-```typescript
-// ❌ Multiple similar components
-components/Button.tsx
-components/PrimaryButton.tsx
-components/NewButton.tsx
-
-// ✅ Consolidate to one
-components/Button.tsx (with variant prop)
-```
-
-### 4. Unused Dependencies
-```json
-// ❌ Package installed but not imported
-{
-  "dependencies": {
-    "lodash": "^4.17.21",  // Not used anywhere
-    "moment": "^2.29.4"     // Replaced by date-fns
-  }
-}
-```
-
-## Example Project-Specific Rules
-
-**CRITICAL - NEVER REMOVE:**
-- Privy authentication code
-- Solana wallet integration
-- Supabase database clients
-- Redis/OpenAI semantic search
-- Market trading logic
-- Real-time subscription handlers
-
-**SAFE TO REMOVE:**
-- Old unused components in components/ folder
-- Deprecated utility functions
-- Test files for deleted features
-- Commented-out code blocks
-- Unused TypeScript types/interfaces
-
-**ALWAYS VERIFY:**
-- Semantic search functionality (lib/redis.js, lib/openai.js)
-- Market data fetching (api/markets/*, api/market/[slug]/)
-- Authentication flows (HeaderWallet.tsx, UserMenu.tsx)
-- Trading functionality (Meteora SDK integration)
+Add checks specific to your project here, e.g. authentication code, payment
+integrations, or real-time subscription handlers that must never be removed
+even if static analysis flags them as unused.
 
 ## Pull Request Template
 
@@ -219,77 +150,39 @@ When opening PR with deletions:
 ```markdown
 ## Refactor: Code Cleanup
 
-### Summary
-Dead code cleanup removing unused exports, dependencies, and duplicates.
-
 ### Changes
-- Removed X unused files
-- Removed Y unused dependencies
-- Consolidated Z duplicate components
+- Removed X unused files, Y unused dependencies, consolidated Z duplicate components
 - See docs/DELETION_LOG.md for details
 
 ### Testing
-- [x] Build passes
-- [x] All tests pass
-- [x] Manual testing completed
-- [x] No console errors
-
-### Impact
-- Bundle size: -XX KB
-- Lines of code: -XXXX
-- Dependencies: -X packages
+- [x] Build passes  [x] All tests pass  [x] No console errors
 
 ### Risk Level
 🟢 LOW - Only removed verifiably unused code
-
-See DELETION_LOG.md for complete details.
 ```
 
 ## Error Recovery
 
 If something breaks after removal:
-
-1. **Immediate rollback:**
-   ```bash
-   git revert HEAD
-   npm install
-   npm run build
-   npm test
-   ```
-
-2. **Investigate:**
-   - What failed?
-   - Was it a dynamic import?
-   - Was it used in a way detection tools missed?
-
-3. **Fix forward:**
-   - Mark item as "DO NOT REMOVE" in notes
-   - Document why detection tools missed it
-   - Add explicit type annotations if needed
-
-4. **Update process:**
-   - Add to "NEVER REMOVE" list
-   - Improve grep patterns
-   - Update detection methodology
+1. **Rollback immediately**: `git revert HEAD && npm install && npm run build && npm test`
+2. **Investigate**: was it a dynamic import, or used in a way detection tools missed?
+3. **Fix forward**: mark the item "DO NOT REMOVE" with a note on why tools missed it
+4. **Update process**: improve grep patterns and detection methodology
 
 ## Best Practices
 
-1. **Start Small** - Remove one category at a time
-2. **Test Often** - Run tests after each batch
-3. **Document Everything** - Update DELETION_LOG.md
-4. **Be Conservative** - When in doubt, don't remove
-5. **Git Commits** - One commit per logical removal batch
-6. **Branch Protection** - Always work on feature branch
-7. **Peer Review** - Have deletions reviewed before merging
-8. **Monitor Production** - Watch for errors after deployment
+- Start small (one category at a time).
+- Test after each batch.
+- Document everything in DELETION_LOG.md.
+- Be conservative when in doubt.
+- One commit per logical batch.
+- Work on a feature branch.
+- Get peer review before merging.
+- Monitor production after deployment.
 
 ## When NOT to Use This Agent
 
-- During active feature development
-- Right before a production deployment
-- When codebase is unstable
-- Without proper test coverage
-- On code you don't understand
+During active feature development, right before a production deployment, when the codebase is unstable, without proper test coverage, or on code you don't understand.
 
 ## Success Metrics
 
@@ -306,6 +199,8 @@ After cleanup session:
 **Remember**: Dead code is technical debt. Regular cleanup keeps the codebase maintainable and fast. But safety first - never remove code without understanding why it exists.
 
 ## Agent Teams Protocol
+
+TaskList, TaskUpdate, TaskCreate, and SendMessage are the Claude Code Agent Teams tools; this section applies only when the agent runs as a team member.
 
 When this agent operates as a team member, follow this protocol.
 
@@ -326,6 +221,8 @@ When this agent operates as a team member, follow this protocol.
 - Do not edit files another member is currently editing.
 - Strictly follow the file scope stated in the task description.
 - If a change outside the scope is needed, consult the team lead.
+- Owned files: the refactor targets specified by architect, and DELETION_LOG.md.
+- Files another member is editing concurrently are out of scope.
 
 ### Team Role: Code Cleanup Executor
 - Role in the team: detect and safely remove unnecessary code.
@@ -334,11 +231,6 @@ When this agent operates as a team member, follow this protocol.
 
 ### Team Compositions
 - **Refactoring team**: after architect's assessment → run cleanup → verify the build with build-error-resolver → verify tests with tdd-guide.
-
-### File Ownership
-- The refactor target files specified by architect.
-- Updates to DELETION_LOG.md.
-- Files another member is editing concurrently are out of scope.
 
 ### Handoff Pattern
 1. Confirm the deletion target list with architect via SendMessage.

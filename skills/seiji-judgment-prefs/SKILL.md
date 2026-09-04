@@ -5,9 +5,9 @@ description: Use when making design, scoping, or technical decisions for seiji (
 
 # seiji's judgment and decision-making preferences
 
-Consistent decision axes seiji applies to "what to choose," extracted from 800+ past instructions.
+seiji's consistent decision axes for choosing between options.
 
-## Iron rules (strongly and repeatedly requested)
+## Iron rules
 
 - **Apply YAGNI rigorously.** Aggressively cut unneeded features and elements. Don't build what isn't needed now.
 - **Keep scope minimal and proceed in stages.** Don't widen scope all at once; start from the necessary range.
@@ -16,8 +16,8 @@ Consistent decision axes seiji applies to "what to choose," extracted from 800+ 
 - **Have alternatives considered before implementation starts.** Lay out options and their trade-offs before choosing.
 - **Split off derived issues or large changes into a separate PR / issue / later work.** Don't mix them into the main thread.
 - **Be strongly wary of the cost and risk of DB schema changes and migrations.** Avoid them where possible; when necessary, scrutinize the impact precisely.
-- **When undecided, make a call and move forward. Skip it if it's too hard.** Don't stall chasing perfection.
-- **Verify robustness, non-destructiveness, and blast radius.** Ensure existing behavior isn't broken and that past-point-in-time values can still be guaranteed, etc.
+- **When undecided, make a call and move forward. Skip it if it cannot be settled quickly.** Don't stall chasing perfection.
+- **Verify robustness, non-destructiveness, and blast radius.** Ensure existing behavior isn't broken and that historical values remain reproducible.
 - **Prioritize separating production from other environments and controlling by permissions.** Factor environment and permission differences into decisions.
 - **Bring legal, compliance, and audit considerations into the decision early** (relevant laws for the business domain).
 - **Use cost, low implementation cost, and simplicity as decision axes.** Choose the cheap, simple path.

@@ -1,6 +1,6 @@
 ---
 name: python-patterns
-description: Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications.
+description: Use when writing or reviewing Python: type hints, dataclasses, exceptions, context managers, async, package layout.
 ---
 
 # Python Development Patterns
@@ -16,77 +16,10 @@ Idiomatic Python patterns and best practices for building robust, efficient, and
 
 ## Core Principles
 
-### 1. Readability Counts
-
-Python prioritizes readability. Code should be obvious and easy to understand.
-
-```python
-# Good: Clear and readable
-def get_active_users(users: list[User]) -> list[User]:
-    """Return only active users from the provided list."""
-    return [user for user in users if user.is_active]
-
-
-# Bad: Clever but confusing
-def get_active_users(u):
-    return [x for x in u if x.a]
-```
-
-### 2. Explicit is Better Than Implicit
-
-Avoid magic; be clear about what your code does.
-
-```python
-# Good: Explicit configuration
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-# Bad: Hidden side effects
-import some_module
-some_module.setup()  # What does this do?
-```
-
-### 3. EAFP - Easier to Ask Forgiveness Than Permission
-
-Python prefers exception handling over checking conditions.
-
-```python
-# Good: EAFP style
-def get_value(dictionary: dict, key: str) -> Any:
-    try:
-        return dictionary[key]
-    except KeyError:
-        return default_value
-
-# Bad: LBYL (Look Before You Leap) style
-def get_value(dictionary: dict, key: str) -> Any:
-    if key in dictionary:
-        return dictionary[key]
-    else:
-        return default_value
-```
+Prefer EAFP (try/except) over LBYL (checking conditions first) — it's the
+idiomatic Python style and avoids race conditions between the check and use.
 
 ## Type Hints
-
-### Basic Type Annotations
-
-```python
-from typing import Optional, List, Dict, Any
-
-def process_user(
-    user_id: str,
-    data: Dict[str, Any],
-    active: bool = True
-) -> Optional[User]:
-    """Process a user and return the updated User or None."""
-    if not active:
-        return None
-    return User(user_id, data)
-```
 
 ### Modern Type Hints (Python 3.9+)
 
@@ -256,40 +189,10 @@ with DatabaseTransaction(conn):
 
 ## Comprehensions and Generators
 
-### List Comprehensions
-
-```python
-# Good: List comprehension for simple transformations
-names = [user.name for user in users if user.is_active]
-
-# Bad: Manual loop
-names = []
-for user in users:
-    if user.is_active:
-        names.append(user.name)
-
-# Complex comprehensions should be expanded
-# Bad: Too complex
-result = [x * 2 for x in items if x > 0 if x % 2 == 0]
-
-# Good: Use a generator function
-def filter_and_transform(items: Iterable[int]) -> list[int]:
-    result = []
-    for x in items:
-        if x > 0 and x % 2 == 0:
-            result.append(x * 2)
-    return result
-```
-
-### Generator Expressions
-
-```python
-# Good: Generator for lazy evaluation
-total = sum(x * x for x in range(1_000_000))
-
-# Bad: Creates large intermediate list
-total = sum([x * x for x in range(1_000_000)])
-```
+Prefer list comprehensions for simple transformations, but expand overly
+complex ones (multiple conditions/nesting) into a plain loop for readability.
+Prefer generator expressions over list comprehensions when the result is only
+iterated once, to avoid materializing a large intermediate list.
 
 ### Generator Functions
 
@@ -368,29 +271,8 @@ print(p1.distance(p2))  # 5.0
 
 ## Decorators
 
-### Function Decorators
-
-```python
-import functools
-import time
-
-def timer(func: Callable) -> Callable:
-    """Decorator to time function execution."""
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        result = func(*args, **kwargs)
-        elapsed = time.perf_counter() - start
-        print(f"{func.__name__} took {elapsed:.4f}s")
-        return result
-    return wrapper
-
-@timer
-def slow_function():
-    time.sleep(1)
-
-# slow_function() prints: slow_function took 1.0012s
-```
+Always use `functools.wraps` on decorators so introspection (name, docstring)
+survives wrapping.
 
 ### Parameterized Decorators
 
@@ -412,28 +294,6 @@ def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 # greet("Alice") returns ["Hello, Alice!", "Hello, Alice!", "Hello, Alice!"]
-```
-
-### Class-Based Decorators
-
-```python
-class CountCalls:
-    """Decorator that counts how many times a function is called."""
-    def __init__(self, func: Callable):
-        functools.update_wrapper(self, func)
-        self.func = func
-        self.count = 0
-
-    def __call__(self, *args, **kwargs):
-        self.count += 1
-        print(f"{self.func.__name__} has been called {self.count} times")
-        return self.func(*args, **kwargs)
-
-@CountCalls
-def process():
-    pass
-
-# Each call to process() prints the call count
 ```
 
 ## Concurrency Patterns
@@ -710,28 +570,6 @@ def append_to(item, items=None):
         items = []
     items.append(item)
     return items
-
-# Bad: Checking type with type()
-if type(obj) == list:
-    process(obj)
-
-# Good: Use isinstance
-if isinstance(obj, list):
-    process(obj)
-
-# Bad: Comparing to None with ==
-if value == None:
-    process()
-
-# Good: Use is
-if value is None:
-    process()
-
-# Bad: from module import *
-from os.path import *
-
-# Good: Explicit imports
-from os.path import join, exists
 
 # Bad: Bare except
 try:

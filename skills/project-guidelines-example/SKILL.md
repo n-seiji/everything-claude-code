@@ -1,13 +1,13 @@
 ---
 name: project-guidelines-example
-description: Example project-specific guidelines skill template showing architecture, code patterns, testing requirements, and deployment workflow for a production application.
+description: Use as a template when creating a project-specific guidelines skill; not applied to real work by itself.
 ---
 
 # Project Guidelines Skill (Example)
 
 This is an example of a project-specific skill. Use this as a template for your own projects.
 
-Based on a real production application: [Zenith](https://zenith.chat) - AI-powered customer discovery platform.
+All names, URLs, and keys below are placeholders.
 
 ---
 
@@ -125,10 +125,10 @@ interface ApiResponse<T> {
   error?: string
 }
 
-async function fetchApi<T>(
+const fetchApi = async <T,>(
   endpoint: string,
   options?: RequestInit
-): Promise<ApiResponse<T>> {
+): Promise<ApiResponse<T>> => {
   try {
     const response = await fetch(`/api${endpoint}`, {
       ...options,
@@ -164,7 +164,7 @@ async def analyze_with_claude(content: str) -> AnalysisResult:
     client = Anthropic()
 
     response = client.messages.create(
-        model="claude-sonnet-4-5-20250514",
+        model="<current-claude-model>",
         max_tokens=1024,
         messages=[{"role": "user", "content": content}],
         tools=[{
@@ -195,9 +195,9 @@ interface UseApiState<T> {
   error: string | null
 }
 
-export function useApi<T>(
+export const useApi = <T,>(
   fetchFn: () => Promise<ApiResponse<T>>
-) {
+) => {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: false,
@@ -344,6 +344,6 @@ SUPABASE_KEY=eyJ...
 
 ## Related Skills
 
-- `coding-standards.md` - General coding best practices
-- `backend-patterns.md` - API and database patterns
-- `frontend-patterns.md` - React and Next.js patterns
+- `coding-standards` - General coding best practices
+- `backend-patterns` - API and database patterns
+- `frontend-patterns` - React and Next.js patterns

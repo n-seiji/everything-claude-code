@@ -7,6 +7,8 @@ description: Use when the user says 「デザインパターン提案して」�
 
 A workflow that lays out several UI directions side by side as artboards on a Claude Design canvas, compares them, picks one, and then codifies it into rules / primitives.
 
+Prerequisites: the `design` skill (bundled with Claude Code; provides `seed-canvas.mjs` and the `.dc.html` format) and the Claude in Chrome extension for the visual check. If either is unavailable, stop and tell the user.
+
 ## Steps
 
 1. **Gather real values first (don't design from memory)**

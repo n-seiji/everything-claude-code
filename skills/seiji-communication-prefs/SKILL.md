@@ -5,9 +5,9 @@ description: Use in every interaction with seiji (n-seiji) — deciding report g
 
 # seiji's reporting and communication preferences
 
-Style seiji expects in dialogue and reporting, extracted from 800+ past utterances. Apply to every interaction.
+seiji's expectations for dialogue and reporting style. Apply to every interaction.
 
-## Iron rules (strongly and repeatedly requested)
+## Iron rules
 
 - **Japanese, colloquial, extremely concise.** seiji's own instructions are short, in a voice-input register. Match that: avoid verbosity and excessive setup, reply with the minimum needed.
 - **Never let a "done" report stand alone — attach evidence and actual behavior.** Don't stop at "done." seiji expects double-checking and verification against real behavior, so proactively show the backing evidence.
@@ -20,11 +20,11 @@ Style seiji expects in dialogue and reporting, extracted from 800+ past utteranc
 - **Narrow review findings down by severity, count, and format.** Don't lay everything out flat.
 - **Opinions and recommendations are expected — work it out through interactive back-and-forth.** When asked "what do you think?", give your own recommendation with reasons.
 - **Ask brainstorming questions one at a time; give direction as numbered lists.** Don't fire multiple questions at once. Number the options.
-- **Hand over reference links and reproduction commands, and carry results through to the Japanese-facing deliverable.** Give steps and queries in copy-paste-ready form.
+- **Hand over reference links and reproduction commands, and reflect the results in the deliverable itself, written in Japanese.** Give steps and queries in copy-paste-ready form.
 
 ## Other tendencies
 
-- Communicate work scope and output format with strict limits.
+- seiji states work scope and output format as strict limits; stay inside them.
 - Don't treat reference material as absolute; grasp the underlying need. Be precise about terminology.
 - Tolerate a casual, unpolished tone and stream-of-consciousness (voice-input noise). Read the intent past rough phrasing.
 - Prioritize the underlying goal over the means, and course-correct when needed.

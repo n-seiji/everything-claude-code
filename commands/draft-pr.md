@@ -1,3 +1,7 @@
+---
+description: Commit, push the current branch, and open a draft PR in one flow.
+---
+
 # Draft PR Command
 
 Create a commit, push the current branch, and open a **draft PR** in one flow.
@@ -8,7 +12,7 @@ Create a commit, push the current branch, and open a **draft PR** in one flow.
 
 Examples:
 - `/draft-pr "fix: sanitize session id path"`
-- `/draft-pr "refactor: remove deprecated commands" "Refactor command set"`
+- `/draft-pr "feat: add export button" "Add CSV export"`
 
 ## Steps
 

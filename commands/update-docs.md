@@ -1,3 +1,7 @@
+---
+description: Sync CONTRIB.md and RUNBOOK.md from package.json and .env.example as source of truth.
+---
+
 # Update Documentation
 
 Sync documentation from source-of-truth:

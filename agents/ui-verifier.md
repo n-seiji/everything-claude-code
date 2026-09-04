@@ -47,6 +47,6 @@ If the following is not already provided, ask the caller before starting work.
 
 ## Output format
 
-1. Table: `Item / Result (OK / NG / Not verified) / Measured value`
+1. Table: `Item / Result (OK / FAIL / Not verified) / Measured value`
 2. List of saved screenshot paths.
 3. "Observations" section: if there was unexpected behavior, state only the facts (no speculation or evaluation).

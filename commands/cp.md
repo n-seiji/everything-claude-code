@@ -18,4 +18,4 @@ Based on the above changes:
 2. Stage all relevant changed files with `git add`
 3. Create a single commit with an appropriate message following conventional commits format (feat, fix, refactor, docs, test, chore, perf, ci)
 4. Push the branch to origin
-4. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+5. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.

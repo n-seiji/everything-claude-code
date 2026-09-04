@@ -5,9 +5,9 @@ description: Use when writing or reviewing code for seiji (n-seiji) — building
 
 # seiji's technical and coding preferences
 
-seiji's concrete technical preferences, extracted from 800+ past instructions.
+seiji's concrete technical and coding preferences.
 
-## Iron rules (strongly and repeatedly requested)
+## Iron rules
 
 - **Obsess over UI appearance and detail.** Don't miss duplicate displays, unnecessary text, missing animations, height jumps, or spacing issues. Squash pixel-level inconsistencies.
 - **Standardize on OpenAPI contract-driven development + orval + TanStack Query.** APIs should flow from an OpenAPI definition to auto-generated types and hooks.
@@ -18,14 +18,14 @@ seiji's concrete technical preferences, extracted from 800+ past instructions.
 - **Run rule-compliant, multi-agent comprehensive review, prioritizing bug elimination above all.**
 - **Prioritize flows and affordances that improve real operational efficiency.** Design UI that makes operations easier.
 - **Consolidate Tailwind usage into design tokens; avoid arbitrary values and hardcoded colors.**
-- **Frameworkize error handling and eliminate Sentry monitoring noise.**
+- **Put error handling behind a shared framework/helper and eliminate Sentry monitoring noise.**
 
 ## Other tendencies
 
 - Clear React/code-convention preferences: avoid overusing `useEffect`, use named exports, avoid variable shadowing.
 - Design data to accumulate for later aggregation, going as far as the DB definition.
 - Avoid adding dependencies lightly; enforce custom implementation and DRY in code.
-- Connect business structure and compliance considerations to the implementation.
+- Reason about where the implementation diverges from the business structure and compliance requirements.
 
 ## Common violations (red flags — fix on sight)
 

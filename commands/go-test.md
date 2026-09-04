@@ -4,234 +4,32 @@ description: Enforce TDD workflow for Go. Write table-driven tests first, then i
 
 # Go TDD Command
 
-This command enforces test-driven development methodology for Go code using idiomatic Go testing patterns.
+Use focused Go testing to verify behavior, following the `tdd-guide` agent's red-green-refactor methodology.
 
-## What This Command Does
+This command invokes the `tdd-guide` agent. Apply the same red-green-refactor cycle with `go test`; the agent's examples are TypeScript.
 
-1. **Define Types/Interfaces**: Scaffold function signatures first
-2. **Write Table-Driven Tests**: Create comprehensive test cases (RED)
-3. **Run Tests**: Verify tests fail for the right reason
-4. **Implement Code**: Write minimal code to pass (GREEN)
-5. **Refactor**: Improve while keeping tests green
-6. **Check Coverage**: Ensure 80%+ coverage
+## Workflow
 
-## When to Use
+1. Identify the package, behavior, and existing test style.
+2. For new behavior or bug fixes, write a failing test first when feasible.
+3. Prefer table-driven tests with clear case names, explicit expected values, and meaningful error messages.
+4. Use mocks, fixtures, and integration helpers already present in the repository.
+5. Run the narrow package test first, then broader project tests if the blast radius warrants it.
+6. Report test commands, pass/fail status, and coverage gaps.
 
-Use `/go-test` when:
-- Implementing new Go functions
-- Adding test coverage to existing code
-- Fixing bugs (write failing test first)
-- Building critical business logic
-- Learning TDD workflow in Go
+Avoid brittle sleeps, network calls, and order-dependent assertions unless the project already uses them intentionally.
 
-## TDD Cycle
-
-```
-RED     → Write failing table-driven test
-GREEN   → Implement minimal code to pass
-REFACTOR → Improve code, tests stay green
-REPEAT  → Next test case
-```
-
-## Example Session
-
-```text
-User: /go-test I need a function to validate email addresses
-
-Agent:
-# TDD Session: Email Validator
-
-## Step 1: Define Interface
-
-```go
-// validator/email.go
-package validator
-
-// ValidateEmail checks if the given string is a valid email address.
-// Returns nil if valid, error describing the issue otherwise.
-func ValidateEmail(email string) error {
-    panic("not implemented")
-}
-```
-
-## Step 2: Write Table-Driven Tests (RED)
-
-```go
-// validator/email_test.go
-package validator
-
-import (
-    "testing"
-)
-
-func TestValidateEmail(t *testing.T) {
-    tests := []struct {
-        name    string
-        email   string
-        wantErr bool
-    }{
-        // Valid emails
-        {"simple email", "user@example.com", false},
-        {"with subdomain", "user@mail.example.com", false},
-        {"with plus", "user+tag@example.com", false},
-        {"with dots", "first.last@example.com", false},
-
-        // Invalid emails
-        {"empty string", "", true},
-        {"no at sign", "userexample.com", true},
-        {"no domain", "user@", true},
-        {"no local part", "@example.com", true},
-        {"double at", "user@@example.com", true},
-        {"spaces", "user @example.com", true},
-        {"no tld", "user@example", true},
-    }
-
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            err := ValidateEmail(tt.email)
-            if tt.wantErr && err == nil {
-                t.Errorf("ValidateEmail(%q) = nil; want error", tt.email)
-            }
-            if !tt.wantErr && err != nil {
-                t.Errorf("ValidateEmail(%q) = %v; want nil", tt.email, err)
-            }
-        })
-    }
-}
-```
-
-## Step 3: Run Tests - Verify FAIL
+## Coverage commands
 
 ```bash
-$ go test ./validator/...
-
---- FAIL: TestValidateEmail (0.00s)
-    --- FAIL: TestValidateEmail/simple_email (0.00s)
-        panic: not implemented
-
-FAIL
-```
-
-✓ Tests fail as expected (panic).
-
-## Step 4: Implement Minimal Code (GREEN)
-
-```go
-// validator/email.go
-package validator
-
-import (
-    "errors"
-    "regexp"
-)
-
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-
-var (
-    ErrEmailEmpty   = errors.New("email cannot be empty")
-    ErrEmailInvalid = errors.New("email format is invalid")
-)
-
-func ValidateEmail(email string) error {
-    if email == "" {
-        return ErrEmailEmpty
-    }
-    if !emailRegex.MatchString(email) {
-        return ErrEmailInvalid
-    }
-    return nil
-}
-```
-
-## Step 5: Run Tests - Verify PASS
-
-```bash
-$ go test ./validator/...
-
-PASS
-ok      project/validator    0.003s
-```
-
-✓ All tests passing!
-
-## Step 6: Check Coverage
-
-```bash
-$ go test -cover ./validator/...
-
-PASS
-coverage: 100.0% of statements
-ok      project/validator    0.003s
-```
-
-✓ Coverage: 100%
-
-## TDD Complete!
-```
-
-## Test Patterns
-
-### Table-Driven Tests
-```go
-tests := []struct {
-    name     string
-    input    InputType
-    want     OutputType
-    wantErr  bool
-}{
-    {"case 1", input1, want1, false},
-    {"case 2", input2, want2, true},
-}
-
-for _, tt := range tests {
-    t.Run(tt.name, func(t *testing.T) {
-        got, err := Function(tt.input)
-        // assertions
-    })
-}
-```
-
-### Parallel Tests
-```go
-for _, tt := range tests {
-    tt := tt // Capture
-    t.Run(tt.name, func(t *testing.T) {
-        t.Parallel()
-        // test body
-    })
-}
-```
-
-### Test Helpers
-```go
-func setupTestDB(t *testing.T) *sql.DB {
-    t.Helper()
-    db := createDB()
-    t.Cleanup(func() { db.Close() })
-    return db
-}
-```
-
-## Coverage Commands
-
-```bash
-# Basic coverage
 go test -cover ./...
-
-# Coverage profile
 go test -coverprofile=coverage.out ./...
-
-# View in browser
 go tool cover -html=coverage.out
-
-# Coverage by function
 go tool cover -func=coverage.out
-
-# With race detection
 go test -race -cover ./...
 ```
 
-## Coverage Targets
+## Coverage targets
 
 | Code Type | Target |
 |-----------|--------|
@@ -240,28 +38,8 @@ go test -race -cover ./...
 | General code | 80%+ |
 | Generated code | Exclude |
 
-## TDD Best Practices
+## Related commands
 
-**DO:**
-- Write test FIRST, before any implementation
-- Run tests after each change
-- Use table-driven tests for comprehensive coverage
-- Test behavior, not implementation details
-- Include edge cases (empty, nil, max values)
-
-**DON'T:**
-- Write implementation before tests
-- Skip the RED phase
-- Test private functions directly
-- Use `time.Sleep` in tests
-- Ignore flaky tests
-
-## Related Commands
-
-- `/go-build` - Fix build errors
-- `/go-review` - Review code after implementation
-- `/verify` - Run full verification loop
-
-## Related
-
-- Skill: `skills/golang-testing/`
+- `/go-build` - fix build errors
+- `/go-review` - review code after implementation
+- `/verify` - run full verification loop

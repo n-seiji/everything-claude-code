@@ -1,3 +1,7 @@
+---
+description: Analyze test coverage and generate tests for under-covered files until 80%+ coverage is reached.
+---
+
 # Test Coverage
 
 Analyze test coverage and generate missing tests:

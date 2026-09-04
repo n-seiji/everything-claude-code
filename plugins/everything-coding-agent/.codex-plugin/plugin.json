@@ -3,7 +3,7 @@
   "version": "1.4.2",
   "description": "n-seiji's coding agent plugin: shared skills and workflows for Codex and Claude Code.",
   "author": {
-    "name": "Affaan Mustafa (forked by n-seiji)"
+    "name": "n-seiji"
   },
   "homepage": "https://github.com/n-seiji/everything-coding-agent",
   "repository": "https://github.com/n-seiji/everything-coding-agent",
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Everything Coding Agent",
     "shortDescription": "Shared coding-agent review and workflow skills",
-    "longDescription": "Provides shared coding-agent workflows for PR review, code review, TDD, and development automation. Codex loads the skills directory directly; Claude Code continues to use the existing plugin manifest and top-level commands.",
+    "longDescription": "Provides shared coding-agent workflows for PR review, code review, TDD, and development automation. Codex loads the skills directory directly. Claude Code uses the plugin manifest in .claude-plugin and the top-level commands, agents, and skills.",
     "developerName": "n-seiji",
     "category": "Productivity",
     "defaultPrompt": "Use everything-coding-agent workflows for PR review, code review, and development automation.",

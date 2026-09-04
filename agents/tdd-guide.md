@@ -20,13 +20,12 @@ You are a Test-Driven Development (TDD) specialist who ensures all code is devel
 ### Step 1: Write Test First (RED)
 ```typescript
 // ALWAYS start with a failing test
-describe('searchMarkets', () => {
-  it('returns semantically similar markets', async () => {
-    const results = await searchMarkets('election')
+describe('searchItems', () => {
+  it('returns matching items', async () => {
+    const results = await searchItems('keyboard')
 
     expect(results).toHaveLength(5)
-    expect(results[0].name).toContain('Trump')
-    expect(results[1].name).toContain('Biden')
+    expect(results[0].name).toContain('Keyboard')
   })
 })
 ```
@@ -39,9 +38,8 @@ npm test
 
 ### Step 3: Write Minimal Implementation (GREEN)
 ```typescript
-export async function searchMarkets(query: string) {
-  const embedding = await generateEmbedding(query)
-  const results = await vectorSearch(embedding)
+const searchItems = async (query: string) => {
+  const results = await findItemsByQuery(query)
   return results
 }
 ```
@@ -97,9 +95,9 @@ Test API endpoints and database operations:
 import { NextRequest } from 'next/server'
 import { GET } from './route'
 
-describe('GET /api/markets/search', () => {
+describe('GET /api/items/search', () => {
   it('returns 200 with valid results', async () => {
-    const request = new NextRequest('http://localhost/api/markets/search?q=trump')
+    const request = new NextRequest('http://localhost/api/items/search?q=keyboard')
     const response = await GET(request, {})
     const data = await response.json()
 
@@ -109,22 +107,10 @@ describe('GET /api/markets/search', () => {
   })
 
   it('returns 400 for missing query', async () => {
-    const request = new NextRequest('http://localhost/api/markets/search')
+    const request = new NextRequest('http://localhost/api/items/search')
     const response = await GET(request, {})
 
     expect(response.status).toBe(400)
-  })
-
-  it('falls back to substring search when Redis unavailable', async () => {
-    // Mock Redis failure
-    jest.spyOn(redis, 'searchMarketsByVector').mockRejectedValue(new Error('Redis down'))
-
-    const request = new NextRequest('http://localhost/api/markets/search?q=test')
-    const response = await GET(request, {})
-    const data = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(data.fallback).toBe(true)
   })
 })
 ```
@@ -135,60 +121,32 @@ Test complete user journeys with Playwright:
 ```typescript
 import { test, expect } from '@playwright/test'
 
-test('user can search and view market', async ({ page }) => {
+test('user can search and view an item', async ({ page }) => {
   await page.goto('/')
 
-  // Search for market
-  await page.fill('input[placeholder="Search markets"]', 'election')
+  // Search for an item
+  await page.fill('input[placeholder="Search items"]', 'keyboard')
   await page.waitForTimeout(600) // Debounce
 
   // Verify results
-  const results = page.locator('[data-testid="market-card"]')
+  const results = page.locator('[data-testid="item-card"]')
   await expect(results).toHaveCount(5, { timeout: 5000 })
 
   // Click first result
   await results.first().click()
 
-  // Verify market page loaded
-  await expect(page).toHaveURL(/\/markets\//)
+  // Verify item page loaded
+  await expect(page).toHaveURL(/\/items\//)
   await expect(page.locator('h1')).toBeVisible()
 })
 ```
 
 ## Mocking External Dependencies
 
-### Mock Supabase
+### Mock the Data Layer
 ```typescript
-jest.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => Promise.resolve({
-          data: mockMarkets,
-          error: null
-        }))
-      }))
-    }))
-  }
-}))
-```
-
-### Mock Redis
-```typescript
-jest.mock('@/lib/redis', () => ({
-  searchMarketsByVector: jest.fn(() => Promise.resolve([
-    { slug: 'test-1', similarity_score: 0.95 },
-    { slug: 'test-2', similarity_score: 0.90 }
-  ]))
-}))
-```
-
-### Mock OpenAI
-```typescript
-jest.mock('@/lib/openai', () => ({
-  generateEmbedding: jest.fn(() => Promise.resolve(
-    new Array(1536).fill(0.1)
-  ))
+jest.mock('@/lib/items', () => ({
+  findItemsByQuery: jest.fn(() => Promise.resolve(mockItems))
 }))
 ```
 
@@ -281,6 +239,8 @@ npm test -- --coverage --ci
 
 ## Agent Teams Protocol
 
+TaskList, TaskUpdate, TaskCreate, and SendMessage are the Claude Code Agent Teams tools; this section applies only when the agent runs as a team member.
+
 When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
@@ -300,6 +260,9 @@ When this agent operates as a team member, follow this protocol.
 - Do not edit files another member is currently editing.
 - Strictly follow the file scope stated in the task description.
 - If a change outside the scope is needed, consult the team lead.
+- Test files: `**/*.test.*`, `**/*.spec.*`, `tests/**`
+- Implementation files: only the scope specified in the task.
+- Do not write tests for files owned by other members (unless requested).
 
 ### Team Role: Test-First Implementer
 - Role in the team: guide test-first implementation.
@@ -309,11 +272,6 @@ When this agent operates as a team member, follow this protocol.
 ### Team Compositions
 - **Feature development team**: after architect approves the design → write tests → implement → hand off to code-reviewer.
 - **Refactoring team**: after refactor-cleaner's changes → verify behavior with tests.
-
-### File Ownership
-- Test files: `**/*.test.*`, `**/*.spec.*`, `tests/**`
-- Implementation files: only the scope specified in the task.
-- Do not write tests for files owned by other members (unless requested).
 
 ### Handoff Pattern
 1. Report progress to the team lead when test creation is complete.

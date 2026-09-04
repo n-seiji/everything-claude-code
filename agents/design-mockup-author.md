@@ -1,6 +1,6 @@
 ---
 name: design-mockup-author
-description: Builds `.dc.html` artboards for a Claude Design canvas from given design tokens and component specs. Delegated to by the ui-directions skill.
+description: Use only from the ui-directions skill, when a set of `.dc.html` artboards for a Claude Design canvas must be produced from given design tokens and component specs.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: sonnet
 ---
