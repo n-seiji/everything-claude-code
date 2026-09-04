@@ -71,6 +71,7 @@ Include specific examples of how to fix issues.
 - Poor variable naming (x, tmp, data)
 - Magic numbers without explanation
 - Inconsistent formatting
+- Comments that restate what the code does (comments must explain why-not; code shows how, tests show what, commits say why)
 
 ## Review Output Format
 
@@ -102,44 +103,3 @@ Add your project-specific checks here. Examples:
 - Validate cache fallback behavior
 
 Customize based on your project's `CLAUDE.md` or skill files.
-
-## Agent Teams Protocol
-
-When this agent operates as a team member, follow this protocol.
-
-### Task Lifecycle
-1. Check available tasks with TaskList (prioritize by ID order).
-2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
-3. After finishing the work, set status to `completed` with TaskUpdate.
-4. Check TaskList again for the next task.
-
-### Communication Rules
-- On starting work: SendMessage the team lead reporting you've started.
-- On finding a blocker: SendMessage the team lead immediately.
-- On finishing work: SendMessage a result summary to the team lead.
-- Requests to other members: SendMessage them directly (do not use broadcast).
-- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
-
-### File Ownership
-- Do not edit files another member is currently editing.
-- Strictly follow the file scope stated in the task description.
-- If a change outside the scope is needed, consult the team lead.
-
-### Team Role: Quality Gate
-- Role in the team: final verification of code quality.
-- Review after implementation tasks are complete (controlled via blockedBy).
-- SendMessage the review results to both the implementer and the team lead.
-- If there are CRITICAL/HIGH issues, TaskCreate a fix task.
-
-### Team Compositions
-- **Feature development team**: after tdd-guide finishes implementation → code review → can run in parallel with security-reviewer.
-- **Parallel review team**: review simultaneously with security-reviewer and python/go-reviewer.
-
-### File Ownership
-- Being review-only, this agent does not edit files (only reads git diff).
-- If a fix is needed, create a fix task and assign it to the implementer.
-
-### Handoff Pattern
-1. After the review, SendMessage the result report to the team lead.
-2. If there are issues: TaskCreate a fix task → assign to the implementer.
-3. If there are no issues: unblock security-reviewer's task.

@@ -17,13 +17,15 @@ Comprehensive Go testing patterns for writing reliable, maintainable tests follo
 
 ## TDD Workflow for Go
 
-### The RED-GREEN-REFACTOR Cycle
+### The TDD Cycle
+
+Keep a TODO list of behaviors in the language of the problem, then work one item at a time: write one failing subtest (Red), make it pass by the fastest honest means — Fake It, then Triangulation (a second case forcing generalization) or an obvious implementation when the logic is clear (Green) — and remove duplication while tests stay green (Refactor). Never have more than one failing test at once; if a test stays red too long, take a smaller step. Tick the TODO item, add anything newly discovered, and repeat.
 
 ```
-RED     → Write a failing test first
-GREEN   → Write minimal code to pass the test
-REFACTOR → Improve code while keeping tests green
-REPEAT  → Continue with next requirement
+RED     → Write one failing test first
+GREEN   → Fake It / Triangulate / Obvious Implementation
+REFACTOR → Remove duplication while tests stay green
+REPEAT  → Tick the TODO item, pick the next one
 ```
 
 ## Table-Driven Tests
@@ -435,14 +437,15 @@ go tool cover -func=coverage.out
 go test -race -coverprofile=coverage.out ./...
 ```
 
-### Coverage Targets
+### Coverage as a Signal
 
-| Code Type | Target |
+Coverage is a byproduct of following the TDD cycle and a signal for where behavior might be untested — not a goal in itself. Never write a test only to raise a percentage. Use the report to find untested paths (especially error handling and edge cases) and write behavior-named tests for them. If the repository has a configured coverage gate, respect it as a floor.
+
+| Code Type | Typical scrutiny |
 |-----------|--------|
-| Critical business logic | 100% |
-| Public APIs | 90%+ |
-| General code | 80%+ |
-| Generated code | Exclude |
+| Critical business logic | Should read as fully characterized by tests |
+| Public APIs | Every documented behavior covered |
+| Generated code | Exclude from analysis |
 
 ### Excluding Generated Code from Coverage
 

@@ -133,8 +133,6 @@ supports them; otherwise do the passes sequentially.
   risks, SQL query performance, GORM batch insert patterns, map preallocation.
 - TypeScript/JavaScript: type safety, React hook correctness, XSS, async error
   handling, cleanup of subscriptions/effects.
-- Python: unsafe deserialization or use of `eval`, mutable defaults, missing
-  resource cleanup, type and test gaps.
 
 **Project-specific review**
 

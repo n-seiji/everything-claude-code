@@ -19,6 +19,7 @@ seiji's concrete technical and coding preferences.
 - **Prioritize flows and affordances that improve real operational efficiency.** Design UI that makes operations easier.
 - **Consolidate Tailwind usage into design tokens; avoid arbitrary values and hardcoded colors.**
 - **Put error handling behind a shared framework/helper and eliminate Sentry monitoring noise.**
+- **Keep comments minimal and put each kind of explanation where it belongs.** Code shows how, tests state what, the commit message says why, and a code comment exists only to say why not (rejected alternative, constraint, trap). Delete comments that restate the code.
 
 ## Other tendencies
 
@@ -35,3 +36,4 @@ seiji's concrete technical and coding preferences.
 - Missing duplicate UI displays, unnecessary text, or missing animations
 - Calling it "done" while still on mocks, without verifying real API connectivity
 - Settling for a symptomatic fix without addressing the root cause or edge cases
+- Comments that narrate what the code does, or a commit message that only says what changed

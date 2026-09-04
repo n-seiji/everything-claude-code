@@ -1,5 +1,5 @@
 ---
-description: Enforce TDD workflow for Go. Write table-driven tests first, then implement. Verify 80%+ coverage with go test -cover.
+description: Drive Go changes with TDD — write one failing table-driven subtest at a time, then the minimal code to pass, using go test -race and -cover for feedback.
 ---
 
 # Go TDD Command
@@ -10,33 +10,28 @@ This command invokes the `tdd-guide` agent. Apply the same red-green-refactor cy
 
 ## Workflow
 
-1. Identify the package, behavior, and existing test style.
-2. For new behavior or bug fixes, write a failing test first when feasible.
-3. Prefer table-driven tests with clear case names, explicit expected values, and meaningful error messages.
-4. Use mocks, fixtures, and integration helpers already present in the repository.
-5. Run the narrow package test first, then broader project tests if the blast radius warrants it.
-6. Report test commands, pass/fail status, and coverage gaps.
+1. Write a TODO list of the behaviors the package needs, in the language of the problem.
+2. Pick the next item and identify the existing table-driven test style to extend.
+3. Red: add one failing subtest case for that behavior, with a clear case name and explicit expected value. Run it and confirm it fails for the intended reason.
+4. Green: make it pass by the fastest means — Fake It, then Triangulation (add a second case that forces generalization) or an obvious implementation when the logic is clear.
+5. Refactor while green: remove duplication between cases, tighten error messages, keep names accurate.
+6. Tick the TODO item, add newly discovered items, and repeat.
+7. Run the narrow package test after each cycle, then broader project tests if the blast radius warrants it.
+8. Report test commands, pass/fail status, and coverage as a signal for untested behavior — not a target.
 
 Avoid brittle sleeps, network calls, and order-dependent assertions unless the project already uses them intentionally.
 
 ## Coverage commands
 
 ```bash
+go test -race ./...
 go test -cover ./...
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out
 go tool cover -func=coverage.out
-go test -race -cover ./...
 ```
 
-## Coverage targets
-
-| Code Type | Target |
-|-----------|--------|
-| Critical business logic | 100% |
-| Public APIs | 90%+ |
-| General code | 80%+ |
-| Generated code | Exclude |
+Coverage highlights untested paths worth a behavior-named test. Never write a test only to move the percentage; respect a repository-configured coverage gate if one exists rather than inventing a target.
 
 ## Related commands
 

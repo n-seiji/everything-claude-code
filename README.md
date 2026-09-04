@@ -48,19 +48,15 @@ Maintenance rules: keep `skills/everything-coding-agent/` and `plugins/everythin
 |---------|-------------|
 | `/build-fix` | Incrementally fix build and type errors, verifying the build after each fix. |
 | `/code-review` | Comprehensive security and quality review of uncommitted changes. |
-| `/cp` | Commit and push to remote. |
-| `/cpp` | Commit, push, and open a draft PR. |
-| `/draft-pr` | Commit, push the current branch, and open a draft PR in one flow. |
 | `/e2e` | Generate and run end-to-end tests with Playwright. Creates test journeys, runs tests, captures screenshots/videos/traces, and uploads artifacts. |
 | `/go-build` | Fix Go build errors, go vet warnings, and linter issues incrementally. Invokes the go-build-resolver agent for minimal, surgical fixes. |
 | `/go-review` | Comprehensive Go code review for idiomatic patterns, concurrency safety, error handling, and security. Invokes the go-reviewer agent. |
-| `/go-test` | Enforce TDD workflow for Go. Write table-driven tests first, then implement. Verify 80%+ coverage with go test -cover. |
-| `/plan` | Restate requirements, assess risks, and create a step-by-step implementation plan. Waits for confirmation before touching any code. |
-| `/python-review` | Comprehensive Python code review for PEP 8 compliance, type hints, security, and Pythonic idioms. Invokes the python-reviewer agent. |
+| `/go-test` | Drive Go changes with TDD — write one failing table-driven subtest at a time, then the minimal code to pass, using go test -race and -cover for feedback. |
+| `/plan` | Restate requirements, assess risks, and create step-by-step implementation plan. WAIT for user CONFIRM before touching any code. |
 | `/refactor-clean` | Identify and safely remove dead code, verifying tests before and after each deletion. |
 | `/review-pr` | Run a multi-perspective, cross-repository PR review from a GitHub PR/Issue URL and post the findings as review comments. |
-| `/tdd` | Enforce test-driven development workflow. Scaffold interfaces, generate tests first, then implement minimal code to pass. Ensure 80%+ coverage. |
-| `/test-coverage` | Analyze test coverage and generate tests for under-covered files until 80%+ coverage is reached. |
+| `/tdd` | Drive a change with test-driven development: TODO list, one failing test at a time, fake it / triangulate / obvious implementation, refactor while green. |
+| `/test-coverage` | Use the coverage report to find risky untested behavior and add behavior-named tests for it — not to chase a percentage. |
 | `/update-docs` | Sync CONTRIB.md and RUNBOOK.md from package.json and .env.example as source of truth. |
 | `/verify` | Run project verification checks (build, types, lint, tests, security, git status) and report readiness. |
 
@@ -78,10 +74,9 @@ Maintenance rules: keep `skills/everything-coding-agent/` and `plugins/everythin
 | `go-build-resolver` | Go build, vet, and compilation error resolution specialist. Fixes build errors, go vet issues, and linter warnings with minimal changes. Use when Go builds fail. |
 | `go-reviewer` | Expert Go code reviewer specializing in idiomatic Go, concurrency patterns, error handling, and performance. Use for all Go code changes. MUST BE USED for Go projects. |
 | `planner` | Expert planning specialist for complex features and refactoring. Use PROACTIVELY when users request feature implementation, architectural changes, or complex refactoring. Automatically activated for planning tasks. |
-| `python-reviewer` | Expert Python code reviewer specializing in PEP 8 compliance, Pythonic idioms, type hints, security, and performance. Use for all Python code changes. MUST BE USED for Python projects. |
 | `refactor-cleaner` | Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it. |
 | `security-reviewer` | Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities. |
-| `tdd-guide` | Test-Driven Development specialist enforcing write-tests-first methodology. Use PROACTIVELY when writing new features, fixing bugs, or refactoring code. Ensures 80%+ test coverage. |
+| `tdd-guide` | Use when implementing a new behavior or fixing a bug: drives the change through a TODO list and small red-green-refactor cycles, with tests written as behavior statements. Also use to add characterization tests before changing unfamiliar code. |
 | `ui-verifier` | Verifies a running web app in the user's real Chrome (Claude in Chrome) and reports measured facts. Use PROACTIVELY after UI changes, before reporting work as done, and when a PR needs verification evidence (screenshots, measured values). |
 
 ## Skills
@@ -100,14 +95,6 @@ Maintenance rules: keep `skills/everything-coding-agent/` and `plugins/everythin
 - `backend-patterns` — Node.js/Express/Next.js API patterns: routes, repositories, caching, auth middleware, and background jobs.
 - `golang-patterns` — idiomatic Go patterns and conventions.
 - `golang-testing` — Go testing patterns: table-driven tests, subtests, benchmarks, fuzzing, coverage.
-- `python-patterns` — Pythonic idioms, PEP 8 standards, type hints, and best practices.
-- `python-testing` — Python testing with pytest: TDD methodology, fixtures, mocking, parametrization, coverage.
-- `java-coding-standards` — Java coding standards for Spring Boot services: naming, immutability, Optional usage, streams, exceptions, generics.
-- `jpa-patterns` — JPA/Hibernate patterns for entity design, relationships, query optimization, transactions, auditing.
-- `springboot-patterns` — Spring Boot architecture patterns, REST API design, layered services, caching, async processing.
-- `springboot-security` — Spring Security best practices for authn/authz, validation, CSRF, secrets, headers, rate limiting.
-- `springboot-tdd` — TDD for Spring Boot using JUnit 5, Mockito, MockMvc, Testcontainers, and JaCoCo.
-- `springboot-verification` — a verification loop for Spring Boot projects: build, static analysis, tests with coverage, security scans.
 
 **Data**
 - `postgres-patterns` — PostgreSQL patterns for query optimization, schema design, indexing, and security.

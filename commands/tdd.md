@@ -1,25 +1,25 @@
 ---
-description: Enforce test-driven development workflow. Scaffold interfaces, generate tests FIRST, then implement minimal code to pass. Ensure 80%+ coverage.
+description: Drive a change with test-driven development: TODO list, one failing test at a time, fake it / triangulate / obvious implementation, refactor while green.
 ---
 
 # TDD Command
 
-Drive implementation through a red-green-refactor test-driven workflow.
+Drive implementation through tests. The goal is clean code that works — TDD is a development technique, not a testing technique.
 
 This command invokes the `tdd-guide` agent.
 
 ## Workflow
 
-1. Clarify the behavior and observable contract.
-2. Inspect existing test patterns and choose the narrowest test layer that proves the behavior.
-3. Write or modify a test that fails for the intended reason.
-4. Run the narrow test and confirm the failure.
-5. Implement the smallest code change to pass.
-6. Re-run the test, then relevant broader checks.
-7. Refactor only with tests green.
-8. Check coverage and add more tests if below 80% (100% for critical code such as financial calculations, auth, or security logic).
+1. Write a TODO list of the behaviors to build, in the language of the problem.
+2. Pick the next item: the one that teaches the most, or is easiest to make pass.
+3. Red: write one failing test for that behavior. Write the assertion first, then the setup needed to reach it. Run it and confirm it fails for the intended reason.
+4. Green: make it pass by the fastest means — Fake It (return a constant), then Triangulation (add a second example to force generalization) or Obvious Implementation when the real code is clear.
+5. Refactor: remove duplication, including duplication between the test and the code, while green.
+6. Tick the TODO item, add newly discovered items, and repeat.
 
-If a true red test is impractical, explain why and choose the closest verification path.
+Never write more than one failing test at a time. If a test stays red too long, take a smaller step.
+
+Tests describe WHAT (one behavior per test, Arrange/Act/Assert, no logic, minimal mocking of process boundaries only); production code shows HOW. Coverage is a byproduct and a signal, not a goal — never write a test only to raise a percentage; respect a repository-configured threshold if one exists.
 
 ## Related commands
 

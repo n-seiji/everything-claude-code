@@ -153,13 +153,16 @@ const parsed = CreateMarketSchema.parse(body);
 - Organize by feature/domain, not by technical type.
 - Naming: components `PascalCase.tsx`, hooks `useX.ts`, utilities `camelCase.ts`, types `x.types.ts`.
 
-## Comments
+## Comments and Commit Messages
 
-Explain *why*, not *what*. Skip comments that restate the obvious code next to them.
+- Code shows HOW. Keep comments minimal.
+- Tests state WHAT: the test name and assertions are the behavior statement.
+- Commit messages explain WHY: what problem the change solves and why this approach.
+- Code comments explain WHY NOT: the alternative that was rejected, the constraint that forced the shape, the trap a reader would fall into. A comment that restates the code is removed.
 
 ```typescript
-// GOOD: explains a non-obvious decision
-// Exponential backoff avoids overwhelming the API during outages
+// GOOD: explains why not (rejected alternative)
+// Not using setTimeout here: it drifts under load; setInterval + drift-correction is exact
 const delay = Math.min(1000 * 2 ** retryCount, 30000);
 
 // BAD: states the obvious

@@ -54,8 +54,7 @@ Issue. Codex lists this skill as `/review-pr`.
    - General correctness and maintainability.
    - Security: secrets, injection, auth boundaries, unsafe paths/commands,
      sensitive logging, external input handling.
-   - Language-specific checks: Go, TypeScript/JavaScript, Python, Java/Kotlin
-     as applicable.
+   - Language-specific checks: Go, TypeScript/JavaScript as applicable.
    - Project-specific rules and business invariants found in repository docs.
 
 5. Output findings first.

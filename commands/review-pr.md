@@ -181,17 +181,6 @@ Determine the language from the changed files' extensions and run the matching r
 - Memory leaks (missing `useEffect` cleanup)
 - XSS vulnerabilities (`dangerouslySetInnerHTML`, etc.)
 
-**Kotlin (.kt) / Java (.java):**
-- Null safety
-- Resource leaks (unused `AutoCloseable`)
-- Thread safety
-- Exception handling
-
-**Python (.py):**
-- Missing type hints
-- Mutable default arguments
-- Security (`eval`, `pickle`, unsafe YAML load)
-
 ### Agent 3: Custom Review (only if `~/.claude/review-pr-config.md` exists)
 
 This is an optional per-user file containing extra project-specific review criteria, one criterion per line. Load it and review from the angles it describes. Skip this agent if the file does not exist.

@@ -493,6 +493,10 @@ issues:
 | gofmt is no one's favorite but everyone's friend | Always format with gofmt/goimports |
 | Return early | Handle errors first, keep happy path unindented |
 
+## Comments
+
+Every exported identifier gets a doc comment: a full sentence starting with the identifier's name (e.g. `// Encode writes the JSON encoding of req to w.`). Beyond doc comments, follow the code = How / tests = What / commit = Why / comment = Why-not rule from coding-standards.
+
 ## Anti-Patterns to Avoid
 
 ```go
