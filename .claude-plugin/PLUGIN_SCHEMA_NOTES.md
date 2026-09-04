@@ -14,7 +14,7 @@ The `version` field is required by the validator even if omitted from some examp
 
 ```json
 {
-  "version": "1.4.2"
+  "version": "2.0.0"
 }
 ```
 
@@ -124,7 +124,7 @@ Avoid cleverness. Be explicit.
 
 ```json
 {
-  "version": "1.4.2",
+  "version": "2.0.0",
   "agents": [
     "./agents/planner.md",
     "./agents/code-reviewer.md"

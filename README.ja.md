@@ -99,10 +99,6 @@ Codex はトップレベルの `commands/` ディレクトリを読み込まな�
 - `golang-testing` — テーブル駆動テスト、サブテスト、ベンチマーク、fuzzing、カバレッジなど Go のテストパターン。
 **データ**
 - `postgres-patterns` — クエリ最適化、スキーマ設計、インデックス、セキュリティに関する PostgreSQL のパターン。
-- `clickhouse-io` — 高パフォーマンスな分析ワークロード向けの ClickHouse データベースパターン、クエリ最適化、分析。
-
-**ドキュメント**
-- `nutrient-document-processing` — Nutrient DWS API を使ってドキュメントを処理・変換・OCR・抽出・redact・署名・記入する。
 
 **UI**
 - `ui-directions` — ユーザーが選択できるよう、複数の UI 方向性の候補を並べて配置する。

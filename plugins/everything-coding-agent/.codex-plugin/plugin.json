@@ -1,6 +1,6 @@
 {
   "name": "everything-coding-agent",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "description": "n-seiji's coding agent plugin: shared skills and workflows for Codex and Claude Code.",
   "author": {
     "name": "n-seiji"
