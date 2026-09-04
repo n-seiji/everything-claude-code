@@ -1,6 +1,6 @@
 ---
 name: seiji-workflow-prefs
-description: Use when doing development work for seiji (n-seiji) — creating GitHub issues, opening or updating PRs, handling PR review comments from AI reviewers/bots, branching, git worktree work, commits/pushes, delegating implementation to Codex, deploying, or reporting work status.
+description: Use when doing development work for seiji (n-seiji) — creating GitHub issues, opening or updating PRs, handling PR review comments from AI reviewers/bots, branching, git worktree work, commits/pushes, delegating implementation to subagents, deploying, or reporting work status.
 ---
 
 # seiji のワークフローの好み
@@ -9,8 +9,8 @@ description: Use when doing development work for seiji (n-seiji) — creating Gi
 
 ## 鉄則（強く反復して求められる）
 
-- **実装は Codex に委譲、計画・調査・レビューは自分（Claude）が担う**。コードを書くフェーズに入る前に、必ず実装計画を立てて提示し承認を得る。実装本体はデフォルトで Codex（`codex:rescue`）に委譲する前提で動く。自分で直接編集してよいのは、seiji が明示的に「今回は自分で作業していい」と言った時か、Codex が停滞している時だけ。委譲時は確定した計画・参照ファイル・プロンプトを渡す。
-- **Codex の稼働を疑う**。委譲後は本当に動いているか確認・報告する。長時間反応がなければ「停滞している可能性」を自分から報告し、直接作業への切替やプロンプト提供を提案する。委譲に固執しない。
+- **実装は subagent に委譲、計画・調査・レビューは自分が担う**。コードを書くフェーズに入る前に、必ず実装計画を立てて提示し承認を得る。実装本体はデフォルトで Agent tool の subagent（`model: "sonnet"`）に委譲する前提で動く。自分で直接編集してよいのは、seiji が明示的に「今回は自分で作業していい」と言った時か、subagent が停滞している時だけ。委譲時は確定した計画・参照ファイル・制約（テスト・コーディング規約）をプロンプトに明記して渡す。独立したタスクが複数あれば 1 メッセージで並列に投げる。
+- **subagent の稼働を疑う**。委譲後は本当に動いているか確認・報告する。長時間反応がなければ「停滞している可能性」を自分から報告し、直接作業への切替やプロンプト提供を提案する。委譲に固執しない。
 - **PR は原則 draft で作る**。明示がなくても draft。複数リポジトリの変更なら各リポジトリごとに個別の draft PR。通常 PR 化・マージは別途 seiji の承認を待つ。
 - **PR レビューコメントは「対応 → 返信 → Resolve」の 3 点セットを毎回完遂**。対応済みでも未 Resolve のスレッドが残らないよう最後に全スレッドを確認する。AI レビュアー（bot）の指摘は全件でなく重要度（IMPORTANT / HIGH 以上）で取捨し、対応しないものも理由を添える。新規コメントが増えていないか繰り返し確認する。
 - **PR レビューは複数の専門エージェントを並列で回し、GitHub 上にインラインコメントで残す**。pr-review-toolkit 等を使う。全件でなく指定された重要度・番号に絞って投稿。「修正でなくコメント」の指示を守り勝手に直さない。Critical 指摘は実際にコードを実行して裏取りする。影響範囲・経路情報もコメントに残す。
@@ -20,7 +20,7 @@ description: Use when doing development work for seiji (n-seiji) — creating Gi
 - **作業フェーズを分離し、段階的に承認を得ながら進める**。いきなり実装せず、まず設計案・実装イメージ・影響範囲を提示して GO をもらう。UI 変更はまず編集のみ行い、実画面で確認するステップを設ける。指示された範囲（例: コンフリクト解消だけ）に留め、次段階へ勝手に進まない。
 - **実装前に実コードベースで調査し、影響範囲を洗い出す**。呼び出し元・波及範囲を確定してから実装依頼へ進む。SQL / スキーマは既存の定義・過去サンプルと照合して裏取りする。バグは git 履歴・reflog まで遡って原因コミットを特定する。
 - **成果物は issue / PR / Notion / md に残し、紐付けまで管理する**。調査・仕様確定・障害対応を永続化。親子（sub-issue）と参照の 2 種のリレーションを張り、既存 PR を紐付け、実装用プロンプトをコメントに残す。前提が変われば issue 本文を更新し不採用理由も記録。issue 起票の手順が定まっていればそれに従い、起票前にプレビュー承認を取る。
-- **エージェントの報告を鵜呑みにせず裏取りする**。「完了しました」で終わらせず根拠を示す。未対応 / 未 Resolve、push 済みか、Codex 稼働状況は自分で再チェックしてから報告する。
+- **エージェントの報告を鵜呑みにせず裏取りする**。「完了しました」で終わらせず根拠を示す。未対応 / 未 Resolve、push 済みか、subagent の稼働状況は自分で再チェックしてから報告する。
 - **実装後はレビュー・不要コード確認・テスト通過を締め作業にする**。別スレッド / subagent で独立レビュー（意図通りか・`.claude` ルール準拠・不要な変更混入・不要コード残存）を回し、リファクタリングを検討。lint / test を通す。CI が落ちたら必ず修正する。
 - **skill の手順・出力フォーマットに厳密に従い、改善は skill 更新で恒久化する**。振る舞いの改善は一時的な memory 保存でなく、skill 本文を更新して残す。
 - **複数リポジトリ横断作業は、それぞれ個別に計画・PR・push する**。
