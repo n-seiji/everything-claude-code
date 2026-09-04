@@ -42,7 +42,7 @@ description: Use when the user says 「デザインパターン提案して」�
    - `pages` を使って re-seed する: page-1「採用: X」に Main + 適用例 + 決定理由（対象・型）のメモ、page-2「検討した案」に他の方向とそのメモ
    - 同じ path で republish する
    - コード化: `.claude/rules/<area>-screens.md` に CORRECT/WRONG 付きのレシピ、判断基準の表、例外を書く
-   - primitive 昇格は実際の利用箇所が 2 つ以上あるものだけに限る。増やす前にユーザーに確認する（例: 今回は PageHeader は昇格、DataTable / Pagination は見送り）
+   - primitive に昇格させるのは利用箇所が 2 つ以上あるものだけ。昇格の対象を増やす前に必ずユーザーに確認する
 
 ## 落とし穴
 
