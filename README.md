@@ -63,7 +63,7 @@ symlink + `enabledPlugins` で有効化する。`home-manager switch` で反映�
 
 | 種別 | パス | 用途 |
 |------|------|------|
-| agents | `agents/*.md` | planner, code-reviewer, tdd-guide, ui-verifier ほか 10 種の subagent |
+| agents | `agents/*.md` | planner, code-reviewer, tdd-guide, ui-verifier, design-mockup-author ほか 10 種の subagent |
 | skills | `skills/*/SKILL.md` | Claude Code 向けの upstream skills |
 | codex skills | `plugins/everything-coding-agent/skills/*/SKILL.md` | Codex の `/` 候補に出す workflow skills |
 | shared commands | `skills/everything-coding-agent/commands/*.md` | Codex / Claude Code 両対応の skill command |
