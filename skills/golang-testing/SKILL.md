@@ -1,6 +1,6 @@
 ---
 name: golang-testing
-description: Go testing patterns including table-driven tests, subtests, benchmarks, fuzzing, and test coverage. Follows TDD methodology with idiomatic Go practices.
+description: Use when adding or fixing Go tests: table-driven tests, subtests, benchmarks, fuzzing, coverage gates.
 ---
 
 # Go Testing Patterns
@@ -17,55 +17,15 @@ Comprehensive Go testing patterns for writing reliable, maintainable tests follo
 
 ## TDD Workflow for Go
 
-### The RED-GREEN-REFACTOR Cycle
+### The TDD Cycle
+
+Keep a TODO list of behaviors in the language of the problem, then work one item at a time: write one failing subtest (Red), make it pass by the fastest honest means — Fake It, then Triangulation (a second case forcing generalization) or an obvious implementation when the logic is clear (Green) — and remove duplication while tests stay green (Refactor). Never have more than one failing test at once; if a test stays red too long, take a smaller step. Tick the TODO item, add anything newly discovered, and repeat.
 
 ```
-RED     → Write a failing test first
-GREEN   → Write minimal code to pass the test
-REFACTOR → Improve code while keeping tests green
-REPEAT  → Continue with next requirement
-```
-
-### Step-by-Step TDD in Go
-
-```go
-// Step 1: Define the interface/signature
-// calculator.go
-package calculator
-
-func Add(a, b int) int {
-    panic("not implemented") // Placeholder
-}
-
-// Step 2: Write failing test (RED)
-// calculator_test.go
-package calculator
-
-import "testing"
-
-func TestAdd(t *testing.T) {
-    got := Add(2, 3)
-    want := 5
-    if got != want {
-        t.Errorf("Add(2, 3) = %d; want %d", got, want)
-    }
-}
-
-// Step 3: Run test - verify FAIL
-// $ go test
-// --- FAIL: TestAdd (0.00s)
-// panic: not implemented
-
-// Step 4: Implement minimal code (GREEN)
-func Add(a, b int) int {
-    return a + b
-}
-
-// Step 5: Run test - verify PASS
-// $ go test
-// PASS
-
-// Step 6: Refactor if needed, verify tests still pass
+RED     → Write one failing test first
+GREEN   → Fake It / Triangulate / Obvious Implementation
+REFACTOR → Remove duplication while tests stay green
+REPEAT  → Tick the TODO item, pick the next one
 ```
 
 ## Table-Driven Tests
@@ -424,40 +384,6 @@ func BenchmarkSort(b *testing.B) {
 }
 ```
 
-### Memory Allocation Benchmarks
-
-```go
-func BenchmarkStringConcat(b *testing.B) {
-    parts := []string{"hello", "world", "foo", "bar", "baz"}
-
-    b.Run("plus", func(b *testing.B) {
-        for i := 0; i < b.N; i++ {
-            var s string
-            for _, p := range parts {
-                s += p
-            }
-            _ = s
-        }
-    })
-
-    b.Run("builder", func(b *testing.B) {
-        for i := 0; i < b.N; i++ {
-            var sb strings.Builder
-            for _, p := range parts {
-                sb.WriteString(p)
-            }
-            _ = sb.String()
-        }
-    })
-
-    b.Run("join", func(b *testing.B) {
-        for i := 0; i < b.N; i++ {
-            _ = strings.Join(parts, "")
-        }
-    })
-}
-```
-
 ## Fuzzing (Go 1.18+)
 
 ### Basic Fuzz Test
@@ -490,34 +416,6 @@ func FuzzParseJSON(f *testing.F) {
 // Run: go test -fuzz=FuzzParseJSON -fuzztime=30s
 ```
 
-### Fuzz Test with Multiple Inputs
-
-```go
-func FuzzCompare(f *testing.F) {
-    f.Add("hello", "world")
-    f.Add("", "")
-    f.Add("abc", "abc")
-
-    f.Fuzz(func(t *testing.T, a, b string) {
-        result := Compare(a, b)
-
-        // Property: Compare(a, a) should always equal 0
-        if a == b && result != 0 {
-            t.Errorf("Compare(%q, %q) = %d; want 0", a, b, result)
-        }
-
-        // Property: Compare(a, b) and Compare(b, a) should have opposite signs
-        reverse := Compare(b, a)
-        if (result > 0 && reverse >= 0) || (result < 0 && reverse <= 0) {
-            if result != 0 || reverse != 0 {
-                t.Errorf("Compare(%q, %q) = %d, Compare(%q, %q) = %d; inconsistent",
-                    a, b, result, b, a, reverse)
-            }
-        }
-    })
-}
-```
-
 ## Test Coverage
 
 ### Running Coverage
@@ -539,14 +437,15 @@ go tool cover -func=coverage.out
 go test -race -coverprofile=coverage.out ./...
 ```
 
-### Coverage Targets
+### Coverage as a Signal
 
-| Code Type | Target |
+Coverage is a byproduct of following the TDD cycle and a signal for where behavior might be untested — not a goal in itself. Never write a test only to raise a percentage. Use the report to find untested paths (especially error handling and edge cases) and write behavior-named tests for them. If the repository has a configured coverage gate, respect it as a floor.
+
+| Code Type | Typical scrutiny |
 |-----------|--------|
-| Critical business logic | 100% |
-| Public APIs | 90%+ |
-| General code | 80%+ |
-| Generated code | Exclude |
+| Critical business logic | Should read as fully characterized by tests |
+| Public APIs | Every documented behavior covered |
+| Generated code | Exclude from analysis |
 
 ### Excluding Generated Code from Coverage
 
@@ -560,28 +459,6 @@ go test -race -coverprofile=coverage.out ./...
 ## HTTP Handler Testing
 
 ```go
-func TestHealthHandler(t *testing.T) {
-    // Create request
-    req := httptest.NewRequest(http.MethodGet, "/health", nil)
-    w := httptest.NewRecorder()
-
-    // Call handler
-    HealthHandler(w, req)
-
-    // Check response
-    resp := w.Result()
-    defer resp.Body.Close()
-
-    if resp.StatusCode != http.StatusOK {
-        t.Errorf("got status %d; want %d", resp.StatusCode, http.StatusOK)
-    }
-
-    body, _ := io.ReadAll(resp.Body)
-    if string(body) != "OK" {
-        t.Errorf("got body %q; want %q", body, "OK")
-    }
-}
-
 func TestAPIHandler(t *testing.T) {
     tests := []struct {
         name       string

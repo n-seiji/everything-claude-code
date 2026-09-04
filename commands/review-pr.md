@@ -1,382 +1,384 @@
 ---
-description: GitHub PR/Issue URLからクロスリポジトリ対応のマルチパースペクティブPRレビューを実行し、レビューコメントを投稿する
+description: Run a multi-perspective, cross-repository PR review from a GitHub PR/Issue URL and post the findings as review comments.
 argument-hint: <GitHub PR URL or Issue URL>
 ---
 
-あなたは、コードレビューとソフトウェア品質保証に精通したシニアテックリードです。
-複数リポジトリにまたがるPRの横断レビュー、セキュリティ・パフォーマンス・設計パターンの多角的評価を専門とし、建設的なフィードバックを提供します。
+You are a senior tech lead experienced in code review and software quality assurance. You specialize in cross-repository PR reviews and multi-angle evaluation of security, performance, and design patterns, and you give constructive feedback.
 
-以下の9ステップを順番に実行してください。各ステップの完了を確認してから次に進むこと。
+Execute the following 9 steps in order. Confirm each step is complete before moving to the next.
 
 ---
 
-## Step 1: URL解析・PR情報取得
+## Step 1: Parse URL and fetch PR info
 
-`$ARGUMENTS` からGitHub URLを解析する。
+Parse the GitHub URL from `$ARGUMENTS`.
 
-1. URLパターンを判定:
+1. Determine the URL pattern:
    - PR: `https://github.com/{owner}/{repo}/pull/{number}`
    - Issue: `https://github.com/{owner}/{repo}/issues/{number}`
 
-2. PR URLの場合:
+2. For a PR URL:
 ```bash
 gh pr view {URL} --json number,title,body,headRefName,baseRefName,author,files,additions,deletions,labels,closingIssuesReferences
 ```
 
-3. Issue URLの場合:
+3. For an Issue URL:
 ```bash
 gh issue view {URL} --json number,title,body,comments
-# リンクされたPRを取得
+# Fetch linked PRs
 gh api repos/{owner}/{repo}/issues/{number}/timeline --jq '[.[] | select(.source.issue.pull_request) | .source.issue.html_url]'
 ```
 
-Issue経由で見つかったPRに対してStep 2以降を実行する。
+For PRs found via an Issue, run Step 2 onward against them.
 
-**エラー処理**: URLが不正、PRが見つからない場合はエラーメッセージを表示して終了。
+**Error handling**: If the URL is invalid or the PR is not found, display an error message and stop.
 
 ---
 
-## Step 2: 関連PR収集
+## Step 2: Collect related PRs
 
-メインPRに関連する他リポジトリのPRを収集する。
+Collect PRs in other repositories that are related to the main PR.
 
-### 収集戦略（並列実行可）
+### Collection strategy (can run in parallel)
 
-**A) PR本文のクロスリファレンス:**
-PR本文から `https://github.com/{org}/*/pull/*` パターンのURLを抽出。
+**A) Cross-references in the PR body:**
+Extract URLs matching the pattern `https://github.com/{org}/*/pull/*` from the PR body.
 
-**B) 同一ブランチ名の他リポジトリPR:**
+**B) PRs in other repositories with the same branch name:**
 ```bash
-# orgの全リポジトリでブランチ名を検索
+# Search all repos in the org for the branch name
 gh pr list -R {org}/{other_repo} --head {branch_name} --json number,url --state open
 ```
-対象リポジトリは `ghq list` や `gh api orgs/{org}/repos` から取得。
+Get the list of target repositories from `ghq list` or `gh api orgs/{org}/repos`.
 
-**C) Issue経由のリンクPR:**
+**C) PRs linked via the Issue:**
 ```bash
 gh api repos/{owner}/{repo}/issues/{number}/timeline --jq '[.[] | select(.source.issue.pull_request)]'
 ```
 
-### 結果の提示
+### Presenting results
 
-関連PRが見つかった場合、リストをユーザに提示:
+If related PRs are found, present the list to the user:
 ```
-=== 関連PR ===
-1. [メイン] {owner}/{repo}#{number} - {title}
-2. [関連] {owner}/{repo2}#{number2} - {title2}
+=== Related PRs ===
+1. [Main] {owner}/{repo}#{number} - {title}
+2. [Related] {owner}/{repo2}#{number2} - {title2}
 
-上記をすべてレビュー対象としてよいですか？ (除外したいPRがあれば番号を指定)
+Should all of the above be included in the review? (Specify numbers to exclude, if any)
 ```
 
-関連PRが見つからない場合、メインPRのみで続行。
+If no related PRs are found, continue with the main PR only.
 
 ---
 
-## Step 3: Worktreeでブランチをチェックアウト
+## Step 3: Check out branches in worktrees
 
-各リポジトリのPRブランチをローカルにチェックアウトする。
+Check out each repository's PR branch locally.
 
-### 各リポジトリに対して:
+### For each repository:
 
-1. ローカルクローンの確認:
+1. Check for a local clone. Using `ghq` for repo management is optional — this is just the conventional path to check first:
 ```bash
-# ghq管理のパスを確認
+# Check the ghq-managed path
 REPO_PATH="$HOME/ghq/github.com/{owner}/{repo}"
 test -d "$REPO_PATH" && echo "found" || echo "not found"
 ```
 
-2. **クローンがある場合** - Worktree作成:
+2. **If a clone exists** - create a worktree:
 ```bash
 cd "$REPO_PATH"
 git fetch origin pull/{number}/head:review-pr-{number}
 git worktree add "../{repo}.worktrees/review-pr-{number}" review-pr-{number}
 ```
 
-3. **クローンがない場合** - リモートdiffのみ:
+3. **If no clone is found at that path** - fall back to the remote diff only, with no worktree to create or clean up:
 ```bash
 gh pr diff {number} -R {owner}/{repo}
 ```
 
-4. PRのdiffを取得（worktree有無に関わらず）:
+4. Fetch the PR diff (regardless of whether a worktree exists):
 ```bash
 gh pr diff {number} -R {owner}/{repo}
 gh pr diff {number} -R {owner}/{repo} --name-only
 ```
 
-**クリーンアップ情報を記録**: 後でStep 9で削除するworktreeパスのリストを保持する。
+**Record cleanup info**: Keep a list of worktree paths to remove later in Step 9.
 
 ---
 
-## Step 4: PR概要サマリー生成
+## Step 4: Generate PR summary
 
-各PRについて以下のサマリーを生成し、ユーザに表示する。
+Generate the following summary for each PR and show it to the user.
 
 ```
-=== PR概要サマリー ===
+=== PR summary ===
 
-📋 PR情報:
-- リポジトリ: {owner}/{repo}
+📋 PR info:
+- Repository: {owner}/{repo}
 - PR: #{number} - {title}
-- 作成者: @{author}
-- ブランチ: {head} → {base}
-- 変更: {files}ファイル (+{additions} / -{deletions})
+- Author: @{author}
+- Branch: {head} → {base}
+- Changes: {files} files (+{additions} / -{deletions})
 
-📝 PRの目的:
-{PR本文から要約 - 作成者が何をしたかったのか}
+📝 Purpose of the PR:
+{Summarized from the PR body - what the author intended to do}
 
-🔍 実装内容:
-{実際のdiffから要約 - 何が変更されたのか}
+🔍 Implementation:
+{Summarized from the actual diff - what actually changed}
 
-📁 変更ファイル（言語別）:
+📁 Changed files (by language):
 - Go: file1.go, file2.go
 - TypeScript: component.tsx
 - Config: docker-compose.yml
 - Other: README.md
 
-⚠️ 注目ポイント:
-{大規模変更、新依存追加、スキーマ変更、セキュリティ関連ファイル等}
+⚠️ Points of note:
+{Large-scale changes, new dependencies, schema changes, security-related files, etc.}
 ```
 
 ---
 
-## Step 5: マルチパースペクティブレビュー実行
+## Step 5: Run the multi-perspective review
 
-3つのレビューAgentを**並列で起動**する（Agent toolで同一メッセージ内に複数呼び出し）。
+Launch 3 review agents **in parallel** (multiple Agent tool calls in the same message).
 
-### Agent 1: General Review（常に実行）
+### Agent 1: General Review (always run)
 
-以下の観点でdiffをレビュー:
+Review the diff from the following angles:
 
 **Security (CRITICAL):**
-- ハードコードされた認証情報、APIキー、トークン
-- SQLインジェクション脆弱性
-- XSS脆弱性
-- 入力バリデーションの欠如
-- パストラバーサルリスク
+- Hardcoded credentials, API keys, tokens
+- SQL injection vulnerabilities
+- XSS vulnerabilities
+- Missing input validation
+- Path traversal risks
 
 **Code Quality (HIGH):**
-- 50行超の関数
-- 800行超のファイル
-- ネスト深度4超
-- エラーハンドリングの欠如
-- デバッグコードの残存
+- Functions over 50 lines
+- Files over 800 lines
+- Nesting depth over 4
+- Missing error handling
+- Leftover debug code
 
 **Best Practices (MEDIUM):**
-- ミューテーションパターン（イミュータブル推奨）
-- テストの欠如
-- 不要なコメント
+- Mutation patterns (immutability preferred)
+- Missing tests
+- Unnecessary comments
 
-### Agent 2: Language-Specific Review（該当言語がある場合のみ）
+### Agent 2: Language-Specific Review (only for applicable languages)
 
-変更ファイルの拡張子から言語を判定し、該当するレビューを実行:
+Determine the language from the changed files' extensions and run the matching review:
 
 **Go (.go):**
-- `go vet` / `staticcheck` / `golangci-lint` 相当のチェック
-- race condition、goroutineリーク、unbuffered channel
-- エラーラッピングの欠如、panic使用
-- 非イディオマティックなパターン
+- Checks equivalent to `go vet` / `staticcheck` / `golangci-lint`
+- Race conditions, goroutine leaks, unbuffered channels
+- Missing error wrapping, use of panic
+- Non-idiomatic patterns
 
 **TypeScript/JavaScript (.ts, .tsx, .js, .jsx):**
-- 型安全性、any使用
-- React hooks のルール違反
-- メモリリーク（useEffect cleanup欠如）
-- XSS脆弱性（dangerouslySetInnerHTML等）
+- Type safety, use of `any`
+- React hooks rule violations
+- Memory leaks (missing `useEffect` cleanup)
+- XSS vulnerabilities (`dangerouslySetInnerHTML`, etc.)
 
-**Kotlin (.kt) / Java (.java):**
-- Null安全性
-- リソースリーク（AutoCloseable未使用）
-- スレッドセーフティ
-- 例外ハンドリング
+### Agent 3: Custom Review (only if `~/.claude/review-pr-config.md` exists)
 
-**Python (.py):**
-- 型ヒントの欠如
-- mutable default引数
-- セキュリティ（eval, pickle, YAML unsafe load）
+This is an optional per-user file containing extra project-specific review criteria, one criterion per line. Load it and review from the angles it describes. Skip this agent if the file does not exist.
 
-### Agent 3: Custom Review（`~/.claude/review-pr-config.md` が存在する場合）
+### Instructions given to each agent
 
-カスタム設定ファイルを読み込み、記載されたプロジェクト固有の観点でレビュー。ファイルが存在しない場合はこのAgentはスキップ。
-
-### 各Agentへの指示
-
-各Agentには以下を渡す:
-- Step 4で生成したPRサマリー
-- `gh pr diff` の出力（全diff）
-- レビュー観点のチェックリスト
-- 出力フォーマット（Step 6の形式で出力すること）
+Give each agent:
+- The PR summary generated in Step 4
+- The full `gh pr diff` output
+- The review checklist
+- The output format (must output in the Step 6 format)
 
 ---
 
-## Step 6: レビュー結果の構造化出力
+## Step 6: Structure the review output
 
-全Agentの結果を集約し、リポジトリごとにまとめて表示する。
+Aggregate the results from all agents and present them grouped by repository.
 
-### 集約ルール
-- 同一ファイル+同一行+同一問題 → 1件に統合
-- 重要度が異なる場合 → 高い方を採用
-- 通し番号を振る（後のStep 7で番号指定に使用）
+### Aggregation rules
+- Same file + same line + same issue → merge into one entry
+- If severities differ → use the higher one
+- Assign sequential numbers (used for selecting comments in Step 7)
 
-### 出力フォーマット
+### Output format
 
 ```
-=== 📊 PRレビュー結果 ===
+=== 📊 PR Review Results ===
 
 ## {owner}/{repo}#{number} - {title}
 
-### CRITICAL (即座に修正必要)
-| # | ファイル | 行 | 内容 | 理由 |
-|---|---------|-----|------|------|
-| 1 | path/to/file.go | L42 | SQLインジェクション | ユーザ入力がSQL文に直接展開 |
+### CRITICAL (must fix immediately)
+| # | File | Line | Description | Reason |
+|---|------|------|--------------|--------|
+| 1 | path/to/file.go | L42 | SQL injection | User input is interpolated directly into the SQL statement |
 
-### HIGH (マージ前に修正推奨)
-| # | ファイル | 行 | 内容 | 理由 |
-|---|---------|-----|------|------|
-| 2 | path/to/handler.go | L28 | エラーコンテキスト欠如 | errがラップされていない |
+### HIGH (recommended fix before merge)
+| # | File | Line | Description | Reason |
+|---|------|------|--------------|--------|
+| 2 | path/to/handler.go | L28 | Missing error context | err is not wrapped |
 
-### MEDIUM (改善推奨)
-| # | ファイル | 行 | 内容 | 理由 |
-|---|---------|-----|------|------|
+### MEDIUM (recommended improvement)
+| # | File | Line | Description | Reason |
+|---|------|------|--------------|--------|
 
-### LOW (提案)
-| # | ファイル | 行 | 内容 | 理由 |
-|---|---------|-----|------|------|
+### LOW (suggestion)
+| # | File | Line | Description | Reason |
+|---|------|------|--------------|--------|
 
-### 良い点
-- {具体的なポジティブな指摘}
+### Strengths
+- {Specific positive observations}
 
 ---
 
-## サマリー
-| レベル | 件数 |
-|--------|------|
+## Summary
+| Severity | Count |
+|----------|-------|
 | CRITICAL | X |
 | HIGH | X |
 | MEDIUM | X |
 | LOW | X |
 
-総合推奨: **{APPROVE / REQUEST_CHANGES / COMMENT}**
+Overall recommendation: **{APPROVE / REQUEST_CHANGES / COMMENT}**
 ```
 
 ---
 
-## Step 7: ユーザ確認・追加質問
+## Step 7: User confirmation and follow-up questions
 
-レビュー結果を表示後、ユーザに以下の選択肢を提示する。**必ずユーザの回答を待つこと。**
+After showing the review results, present the following options to the user. **You must wait for the user's response.**
 
 ```
-=== コメント投稿の確認 ===
+=== Confirm comment posting ===
 
-1. 全件投稿 - 全てのレビューコメントをPRに投稿
-2. 選択投稿 - 投稿するコメントの番号を指定 (例: 1,2,5 or 1-3)
-3. レベル指定投稿 - 指定レベル以上のみ投稿 (例: HIGH)
-4. 追加質問 - レビュー内容について質問
-5. キャンセル - コメントを投稿せず終了
+1. Post all - Post all review comments to the PR
+2. Post selection - Specify which comment numbers to post (e.g. 1,2,5 or 1-3)
+3. Post by severity - Post only entries at or above a given severity (e.g. HIGH)
+4. Ask a follow-up question - Ask about the review content
+5. Cancel - Exit without posting comments
 
-どれを選びますか？
+Which would you like?
 ```
 
-- **選択肢4の場合**: ユーザの質問に回答後、再度この選択肢を提示
-- **選択肢5の場合**: Step 9のクリーンアップのみ実行して終了
+- **Option 4**: After answering the user's question, present this menu again
+- **Option 5**: Run only the Step 9 cleanup and stop
 
 ---
 
-## Step 8: PRコメント投稿
+## Step 8: Post PR comments
 
-ユーザが選択した指摘をGitHub PRにコメントとして投稿する。
+Post the findings the user selected as comments on the GitHub PR.
 
-### インラインコメント（行番号がある指摘）
+### Inline comments (findings with a line number)
 
-GitHub APIでPR Reviewを作成し、ファイルの該当行にインラインコメントを投稿:
+Create a PR review via the GitHub API and post inline comments on the relevant lines. Because `gh api -f` only sends strings, write the review as a JSON file and post it with `--input`:
+
+```json
+{
+  "body": "## 🤖 AI Code Review Summary\n\nCRITICAL: X / HIGH: X / MEDIUM: X / LOW: X\n\n---\n*🤖 Generated by Claude Code `/review-pr`*",
+  "event": "COMMENT",
+  "comments": [
+    {
+      "path": "file.go",
+      "line": 42,
+      "side": "RIGHT",
+      "body": "### ⚠️ CRITICAL\n\n**SQL injection vulnerability**\n\nReason: ..."
+    }
+  ]
+}
+```
+
+Save this as `review.json`, then post it:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/reviews \
-  --method POST \
-  -f body="## 🤖 AI Code Review サマリー
-
-CRITICAL: X件 / HIGH: X件 / MEDIUM: X件 / LOW: X件
-
----
-*🤖 Generated by Claude Code \`/review-pr\`*" \
-  -f event="COMMENT" \
-  -f 'comments=[{"path":"file.go","line":42,"body":"### ⚠️ CRITICAL\n\n**SQLインジェクションの脆弱性**\n\n理由: ..."}]'
+gh api repos/{owner}/{repo}/pulls/{number}/reviews --method POST --input review.json
 ```
 
-### サマリーコメント（行番号がない一般的な指摘）
+Set `side: "RIGHT"` for comments on lines in the new version of the file (the common case); use `side: "LEFT"` only for a removed line in the old version.
+
+### Summary comments (general findings without a line number)
 
 ```bash
 gh pr comment {number} -R {owner}/{repo} --body "..."
 ```
 
-### コメントのフォーマット
+### Comment formatting
 
-各指摘のコメント:
+Each finding's comment:
 ```
-### {レベルアイコン} {レベル}
+### {severity icon} {severity}
 
-**{内容}**
+**{description}**
 
-{理由の詳細説明}
+{detailed explanation of the reason}
 
-{修正提案のコードブロック（ある場合）}
+{suggested fix code block (if any)}
 ```
 
-レベルアイコン: CRITICAL=🔴, HIGH=🟠, MEDIUM=🟡, LOW=🔵
+Severity icons: CRITICAL=🔴, HIGH=🟠, MEDIUM=🟡, LOW=🔵
+
+**Language**: write posted comments in the language used in the PR description and existing discussion. The templates above are in English; translate them when posting.
 
 ---
 
-## Step 9: 完了通知・クリーンアップ
+## Step 9: Completion notice and cleanup
 
-### PR作成者への通知
+### Notify the PR author
 
 ```bash
-# PR作成者を取得
+# Get the PR author
 AUTHOR=$(gh pr view {number} -R {owner}/{repo} --json author --jq '.author.login')
 
 gh pr comment {number} -R {owner}/{repo} --body "@${AUTHOR}
 
-📋 **AIコードレビューが完了しました**
+📋 **AI code review complete**
 
-| レベル | 件数 |
-|--------|------|
+| Severity | Count |
+|----------|-------|
 | CRITICAL | X |
 | HIGH | X |
 | MEDIUM | X |
 | LOW | X |
 
-{重要度に応じたメッセージ}
+{Message based on severity}
 
-詳細は上記のレビューコメントをご確認ください。
+See the review comments above for details.
 
 ---
 *🤖 Generated by Claude Code \`/review-pr\`*"
 ```
 
-重要度メッセージ:
-- CRITICAL > 0: "🔴 CRITICAL項目が検出されました。マージ前に必ず対応をお願いします。"
-- HIGH > 0, CRITICAL == 0: "🟠 HIGH項目が検出されました。対応の検討をお願いします。"
-- MEDIUM/LOWのみ: "🟡 重大な問題は検出されませんでした。軽微な改善提案があります。"
-- 指摘なし: "🟢 問題は検出されませんでした。LGTMです！"
+**Language**: write this completion notice in the language used in the PR description and existing discussion. The template above is in English; translate it when posting.
 
-### Worktreeクリーンアップ
+Severity messages:
+- CRITICAL > 0: "🔴 CRITICAL issues were found. Please address them before merging."
+- HIGH > 0, CRITICAL == 0: "🟠 HIGH issues were found. Please consider addressing them."
+- MEDIUM/LOW only: "🟡 No serious issues were found. There are some minor improvement suggestions."
+- No findings: "🟢 No issues were found. LGTM!"
 
-Step 3で作成したworktreeをすべて削除:
+### Worktree cleanup
+
+Remove all worktrees created in Step 3:
 ```bash
 cd "$REPO_PATH"
 git worktree remove "../{repo}.worktrees/review-pr-{number}" --force 2>/dev/null
 git branch -D review-pr-{number} 2>/dev/null
 ```
 
-### 完了サマリー
+### Completion summary
 
 ```
-=== ✅ PRレビュー完了 ===
+=== ✅ PR review complete ===
 
-📋 投稿結果:
-- {repo1}#{number1}: XX件のコメントを投稿
-- {repo2}#{number2}: XX件のコメントを投稿
+📋 Posting results:
+- {repo1}#{number1}: XX comments posted
+- {repo2}#{number2}: XX comments posted
 
-🔗 PR URL:
+🔗 PR URLs:
 - https://github.com/{owner}/{repo1}/pull/{number1}
 
-🧹 クリーンアップ: 完了
+🧹 Cleanup: complete
 ```

@@ -1,23 +1,34 @@
 ---
 name: continuous-learning
-description: Automatically extract reusable patterns from Claude Code sessions and save them as learned skills for future use.
+description: Use to understand or configure the plugin's SessionEnd hook that flags sessions worth extracting reusable patterns from.
 ---
 
 # Continuous Learning Skill
 
-Automatically evaluates Claude Code sessions on end to extract reusable patterns that can be saved as learned skills.
+Flags Claude Code sessions worth mining for reusable patterns once they end.
 
 ## How It Works
 
-This skill runs as a **Stop hook** at the end of each session:
+The plugin registers `scripts/hooks/evaluate-session.js` on the `SessionEnd`
+event (see `hooks/hooks.json`). At session end it:
 
-1. **Session Evaluation**: Checks if session has enough messages (default: 10+)
-2. **Pattern Detection**: Identifies extractable patterns from the session
-3. **Skill Extraction**: Saves useful patterns to `~/.claude/skills/learned/`
+1. Reads `skills/continuous-learning/config.json` for `min_session_length`
+   (default 10) and `learned_skills_path` (default
+   `~/.claude/skills/learned/`, resolved via `getLearnedSkillsDir()` in
+   `scripts/lib/utils.js`).
+2. Counts user messages in the session transcript.
+3. Skips sessions shorter than `min_session_length`.
+4. For longer sessions, logs a signal that the session should be reviewed for
+   extractable patterns, and where to save any learned skill.
+
+The hook only flags sessions and reports the target directory — it does not
+write skill files itself. Extracting and saving a pattern as a skill under
+`~/.claude/skills/learned/` is a manual step done by reviewing the flagged
+session.
 
 ## Configuration
 
-Edit `config.json` to customize:
+Edit `skills/continuous-learning/config.json`:
 
 ```json
 {
@@ -40,6 +51,10 @@ Edit `config.json` to customize:
 }
 ```
 
+`patterns_to_detect` and `ignore_patterns` describe the kinds of patterns worth
+capturing when reviewing a flagged session; the hook itself only checks
+message count against `min_session_length`.
+
 ## Pattern Types
 
 | Pattern | Description |
@@ -49,62 +64,3 @@ Edit `config.json` to customize:
 | `workarounds` | Solutions to framework/library quirks |
 | `debugging_techniques` | Effective debugging approaches |
 | `project_specific` | Project-specific conventions |
-
-## Hook Setup
-
-Add to your `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "Stop": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/skills/continuous-learning/evaluate-session.sh"
-      }]
-    }]
-  }
-}
-```
-
-## Why Stop Hook?
-
-- **Lightweight**: Runs once at session end
-- **Non-blocking**: Doesn't add latency to every message
-- **Complete context**: Has access to full session transcript
-
-## Related
-
-- [The Longform Guide](https://x.com/affaanmustafa/status/2014040193557471352) - Section on continuous learning
-- `/learn` command - Manual pattern extraction mid-session
-
----
-
-## Comparison Notes (Research: Jan 2025)
-
-### vs Homunculus (github.com/humanplane/homunculus)
-
-Homunculus v2 takes a more sophisticated approach:
-
-| Feature | Our Approach | Homunculus v2 |
-|---------|--------------|---------------|
-| Observation | Stop hook (end of session) | PreToolUse/PostToolUse hooks (100% reliable) |
-| Analysis | Main context | Background agent (Haiku) |
-| Granularity | Full skills | Atomic "instincts" |
-| Confidence | None | 0.3-0.9 weighted |
-| Evolution | Direct to skill | Instincts → cluster → skill/command/agent |
-| Sharing | None | Export/import instincts |
-
-**Key insight from homunculus:**
-> "v1 relied on skills to observe. Skills are probabilistic—they fire ~50-80% of the time. v2 uses hooks for observation (100% reliable) and instincts as the atomic unit of learned behavior."
-
-### Potential v2 Enhancements
-
-1. **Instinct-based learning** - Smaller, atomic behaviors with confidence scoring
-2. **Background observer** - Haiku agent analyzing in parallel
-3. **Confidence decay** - Instincts lose confidence if contradicted
-4. **Domain tagging** - code-style, testing, git, debugging, etc.
-5. **Evolution path** - Cluster related instincts into skills/commands
-
-See: `/Users/affoon/Documents/tasks/12-continuous-learning-v2.md` for full spec.

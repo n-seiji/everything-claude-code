@@ -42,257 +42,28 @@ go list -m all
 
 ## Common Error Patterns & Fixes
 
-### 1. Undefined Identifier
-
-**Error:** `undefined: SomeFunc`
-
-**Causes:**
-- Missing import
-- Typo in function/variable name
-- Unexported identifier (lowercase first letter)
-- Function defined in different file with build constraints
-
-**Fix:**
-```go
-// Add missing import
-import "package/that/defines/SomeFunc"
-
-// Or fix typo
-// somefunc -> SomeFunc
-
-// Or export the identifier
-// func someFunc() -> func SomeFunc()
-```
-
-### 2. Type Mismatch
-
-**Error:** `cannot use x (type A) as type B`
-
-**Causes:**
-- Wrong type conversion
-- Interface not satisfied
-- Pointer vs value mismatch
-
-**Fix:**
-```go
-// Type conversion
-var x int = 42
-var y int64 = int64(x)
-
-// Pointer to value
-var ptr *int = &x
-var val int = *ptr
-
-// Value to pointer
-var val int = 42
-var ptr *int = &val
-```
-
-### 3. Interface Not Satisfied
-
-**Error:** `X does not implement Y (missing method Z)`
-
-**Diagnosis:**
-```bash
-# Find what methods are missing
-go doc package.Interface
-```
-
-**Fix:**
-```go
-// Implement missing method with correct signature
-func (x *X) Z() error {
-    // implementation
-    return nil
-}
-
-// Check receiver type matches (pointer vs value)
-// If interface expects: func (x X) Method()
-// You wrote:           func (x *X) Method()  // Won't satisfy
-```
-
-### 4. Import Cycle
-
-**Error:** `import cycle not allowed`
-
-**Diagnosis:**
-```bash
-go list -f '{{.ImportPath}} -> {{.Imports}}' ./...
-```
-
-**Fix:**
-- Move shared types to a separate package
-- Use interfaces to break the cycle
-- Restructure package dependencies
-
-```text
-# Before (cycle)
-package/a -> package/b -> package/a
-
-# After (fixed)
-package/types  <- shared types
-package/a -> package/types
-package/b -> package/types
-```
-
-### 5. Cannot Find Package
-
-**Error:** `cannot find package "x"`
-
-**Fix:**
-```bash
-# Add dependency
-go get package/path@version
-
-# Or update go.mod
-go mod tidy
-
-# Or for local packages, check go.mod module path
-# Module: github.com/user/project
-# Import: github.com/user/project/internal/pkg
-```
-
-### 6. Missing Return
-
-**Error:** `missing return at end of function`
-
-**Fix:**
-```go
-func Process() (int, error) {
-    if condition {
-        return 0, errors.New("error")
-    }
-    return 42, nil  // Add missing return
-}
-```
-
-### 7. Unused Variable/Import
-
-**Error:** `x declared but not used` or `imported and not used`
-
-**Fix:**
-```go
-// Remove unused variable
-x := getValue()  // Remove if x not used
-
-// Use blank identifier if intentionally ignoring
-_ = getValue()
-
-// Remove unused import or use blank import for side effects
-import _ "package/for/init/only"
-```
-
-### 8. Multiple-Value in Single-Value Context
-
-**Error:** `multiple-value X() in single-value context`
-
-**Fix:**
-```go
-// Wrong
-result := funcReturningTwo()
-
-// Correct
-result, err := funcReturningTwo()
-if err != nil {
-    return err
-}
-
-// Or ignore second value
-result, _ := funcReturningTwo()
-```
-
-### 9. Cannot Assign to Field
-
-**Error:** `cannot assign to struct field x.y in map`
-
-**Fix:**
-```go
-// Cannot modify struct in map directly
-m := map[string]MyStruct{}
-m["key"].Field = "value"  // Error!
-
-// Fix: Use pointer map or copy-modify-reassign
-m := map[string]*MyStruct{}
-m["key"] = &MyStruct{}
-m["key"].Field = "value"  // Works
-
-// Or
-m := map[string]MyStruct{}
-tmp := m["key"]
-tmp.Field = "value"
-m["key"] = tmp
-```
-
-### 10. Invalid Operation (Type Assertion)
-
-**Error:** `invalid type assertion: x.(T) (non-interface type)`
-
-**Fix:**
-```go
-// Can only assert from interface
-var i interface{} = "hello"
-s := i.(string)  // Valid
-
-var s string = "hello"
-// s.(int)  // Invalid - s is not interface
-```
+| # | Error | Cause | Fix |
+|---|-------|-------|-----|
+| 1 | `undefined: SomeFunc` | missing import, typo, unexported identifier, or build-constrained file | add import, fix typo, or export (`someFunc` → `SomeFunc`) |
+| 2 | `cannot use x (type A) as type B` | wrong conversion, interface not satisfied, pointer/value mismatch | `int64(x)`, `&x` / `*ptr` as needed |
+| 3 | `X does not implement Y (missing method Z)` | missing method or wrong receiver type | run `go doc package.Interface`, implement `func (x *X) Z() error {...}`, check pointer vs value receiver |
+| 4 | `import cycle not allowed` | two packages import each other | move shared types to a new package; both import that instead of each other |
+| 5 | `cannot find package "x"` | missing dependency or bad module path | `go get package/path@version` or `go mod tidy` |
+| 6 | `missing return at end of function` | not every path returns | add the missing `return` statement |
+| 7 | `x declared but not used` / `imported and not used` | unused var/import | remove it, use `_ = x`, or blank-import for side effects (`import _ "pkg"`) |
+| 8 | `multiple-value X() in single-value context` | assigning a 2-return call to one var | `result, err := funcReturningTwo()` |
+| 9 | `cannot assign to struct field x.y in map` | Go disallows mutating struct fields inside a map | use `map[string]*MyStruct{}`, or copy-modify-reassign |
+| 10 | `invalid type assertion: x.(T) (non-interface type)` | asserting on a non-interface value | only assert from an `interface{}`-typed value |
 
 ## Module Issues
 
-### Replace Directive Problems
-
-```bash
-# Check for local replaces that might be invalid
-grep "replace" go.mod
-
-# Remove stale replaces
-go mod edit -dropreplace=package/path
-```
-
-### Version Conflicts
-
-```bash
-# See why a version is selected
-go mod why -m package
-
-# Get specific version
-go get package@v1.2.3
-
-# Update all dependencies
-go get -u ./...
-```
-
-### Checksum Mismatch
-
-```bash
-# Clear module cache
-go clean -modcache
-
-# Re-download
-go mod download
-```
+- **Stale replace directive**: `grep "replace" go.mod`, drop with `go mod edit -dropreplace=package/path`
+- **Version conflict**: `go mod why -m package`, then `go get package@v1.2.3` or `go get -u ./...`
+- **Checksum mismatch**: `go clean -modcache && go mod download`
 
 ## Go Vet Issues
 
-### Suspicious Constructs
-
-```go
-// Vet: unreachable code
-func example() int {
-    return 1
-    fmt.Println("never runs")  // Remove this
-}
-
-// Vet: printf format mismatch
-fmt.Printf("%d", "string")  // Fix: %s
-
-// Vet: copying lock value
-var mu sync.Mutex
-mu2 := mu  // Fix: use pointer *sync.Mutex
-
-// Vet: self-assignment
-x = x  // Remove pointless assignment
-```
+Common flags: unreachable code after `return`, printf format mismatch (`%d` given a string), copying a `sync.Mutex` by value (use `*sync.Mutex`), self-assignment (`x = x`). Fix by removing the dead code or correcting the type/format.
 
 ## Fix Strategy
 
@@ -366,43 +137,3 @@ Remaining Issues: list (if any)
 - **Document** any non-obvious fixes with inline comments
 
 Build errors should be fixed surgically. The goal is a working build, not a refactored codebase.
-
-## Agent Teams Protocol
-
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
-
-### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
-
-### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
-
-### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
-
-### Team Role: Go Build Fixer
-- チーム内での役割: Goビルドエラーの迅速な修正
-- build-error-resolver のGo特化版として動作
-- go build, go vet, staticcheck のエラーを修正
-
-### Team Compositions
-- **リファクタリングチーム**: Go コードのリファクタ後にビルド修正
-
-### File Ownership
-- ビルドエラーの原因 `.go` ファイルのみ編集
-- `go.mod`, `go.sum` は自由に修正可
-- 修正前にファイルの担当メンバーに SendMessage で通知
-
-### Handoff Pattern
-1. ビルドエラー報告を受けたら即座に着手
-2. 修正完了後、`go build ./...` と `go vet ./...` の結果をチームリードに SendMessage
-3. 根本原因が他メンバーの変更にある場合、該当メンバーに SendMessage で通知

@@ -7,8 +7,7 @@ allowed-tools: Bash, Read, Write, Edit, bash, read_file, write_file
 # Review PR
 
 Run the everything-coding-agent PR review workflow for a GitHub PR or linked
-Issue. This skill is intentionally exposed as `review-pr` so Codex slash/skill
-completion can surface it directly.
+Issue. Codex lists this skill as `/review-pr`.
 
 ## Workflow
 
@@ -55,8 +54,7 @@ completion can surface it directly.
    - General correctness and maintainability.
    - Security: secrets, injection, auth boundaries, unsafe paths/commands,
      sensitive logging, external input handling.
-   - Language-specific checks: Go, TypeScript/JavaScript, Python, Java/Kotlin
-     as applicable.
+   - Language-specific checks: Go, TypeScript/JavaScript as applicable.
    - Project-specific rules and business invariants found in repository docs.
 
 5. Output findings first.

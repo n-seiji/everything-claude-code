@@ -1,59 +1,31 @@
+---
+description: Run project verification checks (build, types, lint, tests, security, git status) and report readiness.
+---
+
 # Verification Command
 
-Run comprehensive verification on current codebase state.
+Run appropriate checks for the current repository state and report whether it's ready for a PR.
 
-## Instructions
+## Workflow
 
-Execute verification in this exact order:
+1. Discover verification commands from repository instructions, README, package scripts, Makefile, mise, CI, and language config.
+2. Choose mode from `$ARGUMENTS`:
+   - `quick`: build and type checks.
+   - `pre-commit`: focused lint/test checks for changed files.
+   - `pre-pr` or `full` (default): build, lint, tests, and security checks when available.
+3. Run checks in dependency order: build/type, lint, tests, coverage, security/secrets, git status.
+4. Stop early only when a failure blocks later checks.
+5. Report:
 
-1. **Build Check**
-   - Run the build command for this project
-   - If it fails, report errors and STOP
+   ```text
+   VERIFICATION: PASS/FAIL
+   Build:
+   Types:
+   Lint:
+   Tests:
+   Security:
+   Git:
+   Ready for PR:
+   ```
 
-2. **Type Check**
-   - Run TypeScript/type checker
-   - Report all errors with file:line
-
-3. **Lint Check**
-   - Run linter
-   - Report warnings and errors
-
-4. **Test Suite**
-   - Run all tests
-   - Report pass/fail count
-   - Report coverage percentage
-
-5. **Console.log Audit**
-   - Search for console.log in source files
-   - Report locations
-
-6. **Git Status**
-   - Show uncommitted changes
-   - Show files modified since last commit
-
-## Output
-
-Produce a concise verification report:
-
-```
-VERIFICATION: [PASS/FAIL]
-
-Build:    [OK/FAIL]
-Types:    [OK/X errors]
-Lint:     [OK/X issues]
-Tests:    [X/Y passed, Z% coverage]
-Secrets:  [OK/X found]
-Logs:     [OK/X console.logs]
-
-Ready for PR: [YES/NO]
-```
-
-If any critical issues, list them with fix suggestions.
-
-## Arguments
-
-$ARGUMENTS can be:
-- `quick` - Only build + types
-- `full` - All checks (default)
-- `pre-commit` - Checks relevant for commits
-- `pre-pr` - Full checks plus security scan
+Include exact commands run and any failures, with fix suggestions for critical issues.

@@ -3,45 +3,45 @@ name: seiji-judgment-prefs
 description: Use when making design, scoping, or technical decisions for seiji (n-seiji) — deciding what to build or cut, sizing scope, choosing between approaches, weighing DB schema changes or migrations, splitting work into separate PRs/issues, or judging robustness, cost, and compliance impact.
 ---
 
-# seiji の判断・意思決定の好み
+# seiji's judgment and decision-making preferences
 
-過去 800+ の指示から抽出した、seiji が「何を選ぶか」で示す一貫した判断軸。
+seiji's consistent decision axes for choosing between options.
 
-## 鉄則（強く反復して求められる）
+## Iron rules
 
-- **YAGNI を徹底する**。不要な機能・要素は積極的に削る。今いらないものは作らない。
-- **スコープを最小に絞り、段階的に着手する**。一度に広げず、必要な範囲から。
-- **既存資産・既存の仕組みを最優先で流用する**。新規テーブルを作るより既存カラムで済ませられないかをまず考える。既存の運用・実装・規約に乗せる。
-- **エージェントの結論・提案を鵜呑みにせず、根拠を問い返す**。「なぜそれでいいのか」を必ず確かめる。
-- **実装前に方針・複数案を検討させてから着手する**。案を並べ、トレードオフを示してから選ぶ。
-- **派生課題・大きい変更は別 PR / 別 issue / 後回しに切り出す**。本筋に混ぜない。
-- **DB スキーマ変更・マイグレーションのコストとリスクを強く警戒する**。避けられるなら避け、必要なら影響を厳密に見る。
-- **迷ったら割り切って先に進める。難しければ skip する**。完璧を求めて止まらない。
-- **堅牢性・非破壊性・影響範囲を確認する**。既存挙動を壊さないか、過去時点の値を担保できるか等を担保する。
-- **本番／環境別の切り分けと、権限による制御を重視する**。環境差・権限差を判断に組み込む。
-- **法令・コンプライアンス・監査観点を早期に判断材料へ組み込む**（業務ドメインの関連法令）。
-- **コスト・実装コストの低さ・シンプルさを判断軸にする**。安く単純に済む道を選ぶ。
-- **分かりやすさ・情報量の抑制・用途による配置を重視する**。出す情報を絞り、使う場所に置く。
-- **「なぜそうなっているか」の起源と妥当性を追跡する**。現状の由来（いつから・誰の変更か）を確かめてから動く。
-- **未リリース機能では後方互換を省いて大胆に変更する**。まだ本番に出ていないなら互換を気にしない。
-- **対象範囲・スコープを厳密に絞り込む**（表示対象・処理対象を明確に限定する）。
-- **選択肢は少なく、即断も辞さない。ただし需要が読めれば翻意する**。
+- **Apply YAGNI rigorously.** Aggressively cut unneeded features and elements. Don't build what isn't needed now.
+- **Keep scope minimal and proceed in stages.** Don't widen scope all at once; start from the necessary range.
+- **Reuse existing assets and mechanisms first.** Before creating a new table, check whether an existing column can do the job. Build on existing operations, implementation, and conventions.
+- **Never take an agent's conclusion or proposal at face value — push back for the reasoning.** Always confirm "why is this the right call."
+- **Have alternatives considered before implementation starts.** Lay out options and their trade-offs before choosing.
+- **Split off derived issues or large changes into a separate PR / issue / later work.** Don't mix them into the main thread.
+- **Be strongly wary of the cost and risk of DB schema changes and migrations.** Avoid them where possible; when necessary, scrutinize the impact precisely.
+- **When undecided, make a call and move forward. Skip it if it cannot be settled quickly.** Don't stall chasing perfection.
+- **Verify robustness, non-destructiveness, and blast radius.** Ensure existing behavior isn't broken and that historical values remain reproducible.
+- **Prioritize separating production from other environments and controlling by permissions.** Factor environment and permission differences into decisions.
+- **Bring legal, compliance, and audit considerations into the decision early** (relevant laws for the business domain).
+- **Use cost, low implementation cost, and simplicity as decision axes.** Choose the cheap, simple path.
+- **Prioritize clarity, limiting the amount of information shown, and placement suited to use.** Trim what's shown and put it where it's used.
+- **Trace the origin and validity of "why it's like this."** Confirm the history of the current state (since when, whose change) before acting.
+- **For unreleased features, drop backward compatibility and change boldly.** If it hasn't shipped to production yet, don't worry about compatibility.
+- **Tightly scope the target range** (clearly limit what's displayed or processed).
+- **Keep options few and be willing to decide quickly — but reconsider if demand becomes clear.**
 
-## その他の傾向
+## Other tendencies
 
-- 疎結合・差し替え容易性を設計判断軸にする（将来移行を見据える）。
-- 重い集計はバッチ化・蓄積を検討し、正確性にこだわる。
-- 違和感を言語化して立ち止まり、方針転換も躊躇しない。
-- 顧客が見られる情報は社内画面でも見られるようにする、という一貫性を重視。
-- 命名・呼称を軽視せず、正確さと分かりやすさで詰める。
-- コンポーネント化・共通化で個別実装の手間を減らす。
-- 環境制約は迂回法を自分で提案して素早く越える。
-- 一時的・その場限りでよい機能は過剰実装しない。
+- Use loose coupling and easy replaceability as a design decision axis (with future migration in mind).
+- For heavy aggregations, consider batching and accumulation, and insist on accuracy.
+- Verbalize discomfort and stop to reconsider; don't hesitate to change direction.
+- Value consistency: information visible to customers should also be visible on internal screens.
+- Don't take naming and terminology lightly; work them out for accuracy and clarity.
+- Reduce individual implementation effort through componentization and shared code.
+- Propose your own workaround for environment constraints and move past them quickly.
+- Don't over-engineer features meant to be temporary or one-off.
 
-## やりがちな違反（Red flags — 見つけたら止まる）
+## Common violations (red flags — stop on sight)
 
-- 既存カラム/仕組みを調べずに新規テーブル・新機能を足そうとしている
-- 依頼された範囲を超えて「ついでに」広げている
-- 案を 1 つだけ出して即実装に入っている
-- スキーマ変更・マイグレーションを軽く提案している
-- 「なぜ今こうなっているか」を調べずに変更しようとしている
+- Adding a new table or feature without checking existing columns/mechanisms first
+- Expanding scope beyond what was requested "while at it"
+- Presenting only one option and jumping straight to implementation
+- Casually proposing a schema change or migration
+- Changing something without investigating "why it's currently like this"

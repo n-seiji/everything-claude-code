@@ -1,53 +1,55 @@
 ---
 name: ui-directions
-description: Use when the user says 「デザインパターン提案して」「UI の案いくつか」「どんな見た目がいいか迷ってる」, when a screen family (一覧/設定/詳細) needs a shared visual pattern, or before building a new area's screens.
+description: Use when the user says 「デザインパターン提案して」「UI の案いくつか」「どんな見た目がいいか迷ってる」 (propose design patterns / a few UI options / undecided on the look), when a screen family (list/settings/detail) needs a shared visual pattern, or before building a new area's screens.
 ---
 
 # UI Directions
 
-複数の UI 方向性を Claude Design キャンバス上に artboard として並べて比較し、1 つ選んでから rules / primitive に落とし込む workflow。
+A workflow that lays out several UI directions side by side as artboards on a Claude Design canvas, compares them, picks one, and then codifies it into rules / primitives.
 
-## 手順
+Prerequisites: the `design` skill (bundled with Claude Code; provides `seed-canvas.mjs` and the `.dc.html` format) and the Claude in Chrome extension for the visual check. If either is unavailable, stop and tell the user.
 
-1. **実値を先に集める（記憶で設計しない）**
-   - デザイントークンの定義（例: Tailwind の `@theme`、`tokens.css`、theme ファイル）
-   - 共通 UI 部品（button / card / badge / field 等）の実装と variant 定義
-   - 依頼に一番近い既存画面（header、sidebar、table）から正確な class / px を抜き出す
-   - ユーザーが渡した legacy / 参考スクリーンショットは「構造の参考」としてのみ扱う（配色や角丸まで模倣しない）
+## Steps
 
-2. **軸を明示して 2〜3 方向を命名する**
-   - 例: パネル踏襲 / フィルターバー+テーブル / 高密度+条件サイドパネル
-   - 各方向に狙いとトレードオフを添える。有力候補を 1 つ選びつつ、他の方向も誠実に主張する（弱く見せて消化試合にしない）
-   - 有力候補には「別の画面種別への適用例」artboard を 1 つ追加する（例: 一覧が主題なら設定フォームを 1 枚）。これで方向性が単発画面向けでなく汎用パターンであることを示す
+1. **Gather real values first (don't design from memory)**
+   - Design token definitions (e.g. Tailwind `@theme`, `tokens.css`, a theme file)
+   - Shared UI primitives (button / card / badge / field, etc.): their implementation and variant definitions
+   - Pull exact classes/px from the existing screen closest to the request (header, sidebar, table)
+   - Treat any legacy or reference screenshot the user provides as a "structural reference" only — don't copy its colors or corner radii
 
-3. **artboard の作成は `design-mockup-author` subagent に委譲する**
-   - 渡すもの: トークン表（hex / px）、component anatomy、サンプルデータ（実際のカラム名・現実的な行データ）、各方向の spec、全 artboard で同一に複製する sidebar / header の内容、frame サイズ（例: desktop 1440×900）、フォーマット規約への参照（`design` skill の SKILL.md「Authoring the seed .dc.html」「Quick syntax card」節）
-   - 成果物として要求するもの: 有力候補 = `Main.dc.html`、他方向 = `DirectionA.dc.html` / `DirectionB.dc.html` / …、各方向の上に狙い・トレードオフの注釈を持つ `canvas.json`
+2. **Name 2–3 directions with explicit axes**
+   - Example: follow the existing panel style / filter bar + table / high-density + conditional side panel
+   - Add the intent and trade-offs for each direction. Pick one leading candidate, but argue honestly for the others too (don't make them look weak just to pad out the set)
+   - Add one "applied to another screen type" artboard for the leading candidate (e.g. if a list screen is the main subject, add one settings-form artboard). This shows the direction is a general pattern, not a one-off screen
 
-4. **`design` skill のヘルパーで組み立てる**
-   - `/design` を呼んで base directory を取得し、`seed-canvas.mjs --template … --out <name>.html --title … --artboard … --canvas canvas.json` を実行後 `--check`
-   - ファイル名・title は検討中のデザイン名にする。`design.html` のような汎用名にしない
+3. **Delegate artboard creation to the `design-mockup-author` subagent**
+   - Hand over: the token table (hex/px), component anatomy, sample data (real column names, realistic row data), each direction's spec, the sidebar/header content to replicate identically across all artboards, the frame size (e.g. desktop 1440×900), and a reference to the format conventions (the "Authoring the seed .dc.html" and "Quick syntax card" sections of the `design` skill's SKILL.md)
+   - Require as output: `Main.dc.html` for the leading candidate, `DirectionA.dc.html` / `DirectionB.dc.html` / … for the other directions, and a `canvas.json` with intent/trade-off annotations above each direction
 
-5. **公開前に必ず目視する**
-   - Chrome extension は `file://` をブロックするため、seed した html のディレクトリで静的サーバー（例: `python3 -m http.server <port>`）を立て `http://localhost:<port>/<name>.html` を開く
-   - artboard は遅延マウントされ、サムネイルはしばらく白いままなので 10 秒ほど待つ
-   - 各 artboard を展開（▷）してスクリーンショットし、明らかな不備（例: ボタンの折り返し → `white-space:nowrap; flex-shrink:0` を追加、ヘッダー文言の誤り）は `.dc.html` を直接編集して re-seed する
-   - 確認後は必ず http server を kill する
+4. **Assemble with the `design` skill's helper**
+   - Call `/design` to get the base directory, then run `seed-canvas.mjs --template … --out <name>.html --title … --artboard … --canvas canvas.json`, followed by `--check`
+   - Use the design name under consideration for the file name/title. Don't use a generic name like `design.html`
 
-6. **`design` skill の指示どおりに公開する**
-   - contract pin、`artifact-capabilities` の roster から選んだ capabilities、favicon を設定
-   - 公開後、リンクと各方向 1 行ずつの説明をユーザーに渡す
+5. **Always eyeball it before publishing**
+   - The Chrome extension blocks `file://`, so start a static server (e.g. `python3 -m http.server <port>`) in the directory holding the seeded html and open `http://localhost:<port>/<name>.html`
+   - Artboards mount lazily and thumbnails stay blank for a while — wait about 10 seconds
+   - Expand (▷) and screenshot each artboard; for obvious defects (e.g. a button wrapping — add `white-space:nowrap; flex-shrink:0`, or a wrong header label) edit the `.dc.html` directly and re-seed
+   - Always kill the http server after checking
 
-7. **決定後の再構成とコード化**
-   - `pages` を使って re-seed する: page-1「採用: X」に Main + 適用例 + 決定理由（対象・型）のメモ、page-2「検討した案」に他の方向とそのメモ
-   - 同じ path で republish する
-   - コード化: リポジトリのルール置き場（例: `.claude/rules/<area>-screens.md`）に、正例 / 反例付きのレシピ、判断基準の表、例外を書く
-   - primitive に昇格させるのは利用箇所が 2 つ以上あるものだけ。昇格の対象を増やす前に必ずユーザーに確認する
+6. **Publish as the `design` skill instructs**
+   - Set the contract pin, capabilities chosen from the `artifact-capabilities` roster, and the favicon
+   - After publishing, hand the user the link plus a one-line description of each direction
 
-## 落とし穴
+7. **Restructure and codify after the decision**
+   - Re-seed using `pages`: page 1 "Adopted: X" with Main, the applied example, and a note on the decision rationale (target and type); page 2 "Considered alternatives" with the other directions and their notes
+   - Republish at the same path
+   - Codify: in the repo's rules location (e.g. `.claude/rules/<area>-screens.md`), write a recipe with correct/incorrect examples, a decision-criteria table, and exceptions
+   - Only promote to a primitive what is actually used in 2+ places. Always confirm with the user before adding promotion targets
 
-- `file://` は Chrome extension でブロックされる。必ず http server 経由で見る
-- canvas のサムネイルはマウントされるまで白紙。焦って公開前に判断しない
-- 注釈の y offset は目安 -160 だと name strip の上に来る。artboard に重ならない位置を確認する
-- sidebar / header の markup は全 artboard でバイト単位まで同一にする。手でコピーせず、小さな build script で生成させる
-- JPEG スクリーンショットはコントラストの低い文字を潰して見せることがある。怪しい箇所は JS で computed color を確認する
+## Pitfalls
+
+- `file://` is blocked by the Chrome extension. Always view through an http server
+- Canvas thumbnails stay blank until mounted. Don't judge before publishing out of impatience
+- An annotation y-offset around -160 lands above the name strip as a rule of thumb. Check it doesn't overlap the artboard
+- Keep sidebar/header markup byte-identical across all artboards. Don't copy by hand — generate it with a small build script
+- JPEG screenshots can crush low-contrast text into illegibility. For suspicious spots, check the computed color via JS

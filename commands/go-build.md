@@ -4,180 +4,38 @@ description: Fix Go build errors, go vet warnings, and linter issues incremental
 
 # Go Build and Fix
 
-This command invokes the **go-build-resolver** agent to incrementally fix Go build errors with minimal changes.
+Fix Go build and static analysis failures with minimal changes.
 
-## What This Command Does
+This command invokes the `go-build-resolver` agent.
 
-1. **Run Diagnostics**: Execute `go build`, `go vet`, `staticcheck`
-2. **Parse Errors**: Group by file and sort by severity
-3. **Fix Incrementally**: One error at a time
-4. **Verify Each Fix**: Re-run build after each change
-5. **Report Summary**: Show what was fixed and what remains
+## Workflow
 
-## When to Use
+1. Discover repository Go commands from `AGENTS.md`, README, Makefile, mise, CI, and scripts.
+2. Run the narrowest relevant command first, usually `go test ./...`, `go build ./...`, `go vet ./...`, or the project wrapper.
+3. Parse errors by package and file. Fix compile blockers before lint or cleanup issues.
+4. Apply one small fix at a time and rerun the relevant command.
+5. Use `go mod tidy` only when module files are actually implicated.
+6. Finish with a summary of commands run, errors fixed, and any remaining failures.
 
-Use `/go-build` when:
-- `go build ./...` fails with errors
-- `go vet ./...` reports issues
-- `golangci-lint run` shows warnings
-- Module dependencies are broken
-- After pulling changes that break the build
+Preserve existing architecture and generated-code boundaries.
 
-## Diagnostic Commands Run
+## Diagnostic commands
 
 ```bash
-# Primary build check
 go build ./...
-
-# Static analysis
 go vet ./...
-
-# Extended linting (if available)
-staticcheck ./...
-golangci-lint run
-
-# Module issues
+staticcheck ./...       # if available
+golangci-lint run       # if available
 go mod verify
 go mod tidy -v
 ```
 
-## Example Session
+## Stop conditions
 
-```text
-User: /go-build
+Stop and report if: the same error persists after 3 attempts, a fix introduces more errors, the fix requires architectural changes, or a dependency is missing.
 
-Agent:
-# Go Build Resolution
+## Related commands
 
-## Initial Diagnostics
-
-```bash
-$ go build ./...
-internal/service/user.go:25:15: undefined: UserRepository
-internal/handler/api.go:42:9: cannot use x (type string) as type int
-internal/handler/api.go:58:2: missing return at end of function
-```
-
-Errors found: 3
-
-## Fix 1: Undefined Identifier
-
-File: internal/service/user.go:25
-Error: undefined: UserRepository
-Cause: Missing import
-
-```go
-// Added import
-import "project/internal/repository"
-
-// Changed
-var repo UserRepository
-// To
-var repo repository.UserRepository
-```
-
-```bash
-$ go build ./...
-# 2 errors remaining
-```
-
-## Fix 2: Type Mismatch
-
-File: internal/handler/api.go:42
-Error: cannot use x (type string) as type int
-
-```go
-// Changed
-count := params.Get("count")
-// To
-countStr := params.Get("count")
-count, _ := strconv.Atoi(countStr)
-```
-
-```bash
-$ go build ./...
-# 1 error remaining
-```
-
-## Fix 3: Missing Return
-
-File: internal/handler/api.go:58
-Error: missing return at end of function
-
-```go
-func GetUser(id string) (*User, error) {
-    if id == "" {
-        return nil, ErrInvalidID
-    }
-    user := findUser(id)
-    // Added missing return
-    return user, nil
-}
-```
-
-```bash
-$ go build ./...
-# Build successful!
-```
-
-## Final Verification
-
-```bash
-$ go vet ./...
-# No issues
-
-$ go test ./...
-ok      project/internal/service   0.015s
-ok      project/internal/handler   0.023s
-```
-
-## Summary
-
-| Metric | Count |
-|--------|-------|
-| Build errors fixed | 3 |
-| Vet warnings fixed | 0 |
-| Files modified | 2 |
-| Remaining issues | 0 |
-
-Build Status: ✅ SUCCESS
-```
-
-## Common Errors Fixed
-
-| Error | Typical Fix |
-|-------|-------------|
-| `undefined: X` | Add import or fix typo |
-| `cannot use X as Y` | Type conversion or fix assignment |
-| `missing return` | Add return statement |
-| `X does not implement Y` | Add missing method |
-| `import cycle` | Restructure packages |
-| `declared but not used` | Remove or use variable |
-| `cannot find package` | `go get` or `go mod tidy` |
-
-## Fix Strategy
-
-1. **Build errors first** - Code must compile
-2. **Vet warnings second** - Fix suspicious constructs
-3. **Lint warnings third** - Style and best practices
-4. **One fix at a time** - Verify each change
-5. **Minimal changes** - Don't refactor, just fix
-
-## Stop Conditions
-
-The agent will stop and report if:
-- Same error persists after 3 attempts
-- Fix introduces more errors
-- Requires architectural changes
-- Missing external dependencies
-
-## Related Commands
-
-- `/go-test` - Run tests after build succeeds
-- `/go-review` - Review code quality
-- `/verify` - Full verification loop
-
-## Related
-
-- Agent: `agents/go-build-resolver.md`
-- Skill: `skills/golang-patterns/`
+- `/go-test` - run tests after build succeeds
+- `/go-review` - review code quality
+- `/verify` - full verification loop

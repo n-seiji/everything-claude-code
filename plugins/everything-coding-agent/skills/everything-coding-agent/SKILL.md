@@ -1,14 +1,14 @@
 ---
 name: everything-coding-agent
-description: Review GitHub pull requests and apply everything-coding-agent workflows from Codex or Claude Code. Use when the user asks for review-pr, PR review, cross-repository PR review, code review, or wants behavior similar to the everything-coding-agent slash commands.
+description: Use from Codex or Claude Code when the user asks for review-pr or wants a GitHub PR or Issue URL reviewed. Local diff review is `code-review` (a Codex skill / Claude Code command).
 allowed-tools: Bash, Read, Write, Edit, bash, read_file, write_file
 ---
 
 # Everything Coding Agent
 
 This skill exposes host-neutral workflows from `everything-coding-agent`.
-Claude Code can still use the top-level `commands/` directory. Codex loads
-this shared skill directory through `.codex-plugin/plugin.json`.
+Claude Code uses the top-level `commands/` directory; Codex loads this
+skill directory through `.codex-plugin/plugin.json`.
 
 ## PR Review Workflow
 
@@ -133,14 +133,13 @@ supports them; otherwise do the passes sequentially.
   risks, SQL query performance, GORM batch insert patterns, map preallocation.
 - TypeScript/JavaScript: type safety, React hook correctness, XSS, async error
   handling, cleanup of subscriptions/effects.
-- Python: unsafe deserialization/eval, mutable defaults, missing resource
-  cleanup, type and test gaps.
 
 **Project-specific review**
 
-Apply discovered repository rules, docs, and business rules. In this repository
-family, pay extra attention to financial correctness, tenant scoping, migration
-safety, OpenAPI-driven API changes, and data integrity.
+Apply discovered repository rules, docs, and business rules. If the target
+repository handles money, multi-tenant data, or OpenAPI-driven APIs, add checks
+for financial correctness, tenant scoping, migration safety, and contract
+drift.
 
 ### 6. Output Format
 
@@ -213,5 +212,5 @@ user worktrees, uncommitted user changes, or unrelated branches.
 - `/everything-coding-agent:review-pr <GitHub PR URL or Issue URL>` - run the
   PR review workflow above.
 
-Plain-language requests such as "このPRをreview-prっぽくレビューして" should trigger
+Plain-language requests such as "このPRをreview-prっぽくレビューして" (review this PR review-pr style) should trigger
 the same workflow.

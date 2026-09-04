@@ -1,54 +1,40 @@
 ---
 name: strategic-compact
-description: Suggests manual context compaction at logical intervals to preserve context through task phases rather than arbitrary auto-compaction.
+description: Use when deciding whether to run /compact, or to understand the plugin's built-in tool-call counter hook.
 ---
 
 # Strategic Compact Skill
 
-Suggests manual `/compact` at strategic points in your workflow rather than relying on arbitrary auto-compaction.
+Suggests when to run `/compact` yourself instead of waiting for automatic
+compaction to fire mid-task.
 
 ## Why Strategic Compaction?
 
-Auto-compaction triggers at arbitrary points:
-- Often mid-task, losing important context
-- No awareness of logical task boundaries
-- Can interrupt complex multi-step operations
-
-Strategic compaction at logical boundaries:
-- **After exploration, before execution** - Compact research context, keep implementation plan
-- **After completing a milestone** - Fresh start for next phase
-- **Before major context shifts** - Clear exploration context before different task
+Auto-compaction triggers at arbitrary points, often mid-task, with no
+awareness of logical task boundaries. Compacting at logical boundaries instead
+works better:
+- **After exploration, before execution** - keep the plan, drop research context
+- **After completing a milestone** - fresh start for the next phase
+- **Before major context shifts** - clear exploration context before a different task
 
 ## How It Works
 
-The `suggest-compact.sh` script runs on PreToolUse (Edit/Write) and:
+The plugin registers `scripts/hooks/suggest-compact.js` as a `PreToolUse` hook
+on the `Edit|Write` matcher (see `hooks/hooks.json`). On each matching tool
+call it:
 
-1. **Tracks tool calls** - Counts tool invocations in session
-2. **Threshold detection** - Suggests at configurable threshold (default: 50 calls)
-3. **Periodic reminders** - Reminds every 25 calls after threshold
+1. Increments a per-session tool-call counter (a temp file keyed by session
+   ID).
+2. Once the counter reaches `COMPACT_THRESHOLD` (env var, default `50`), logs
+   a suggestion to consider `/compact` if you're transitioning phases.
+3. After that, logs the same reminder every 25 calls.
 
-## Hook Setup
-
-Add to your `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [{
-      "matcher": "tool == \"Edit\" || tool == \"Write\"",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/skills/strategic-compact/suggest-compact.sh"
-      }]
-    }]
-  }
-}
-```
+The hook only logs a suggestion — it never runs `/compact` itself; you decide
+whether the moment is right.
 
 ## Configuration
 
-Environment variables:
-- `COMPACT_THRESHOLD` - Tool calls before first suggestion (default: 50)
+- `COMPACT_THRESHOLD` - tool calls before the first suggestion (default: 50)
 
 ## Best Practices
 
@@ -56,8 +42,3 @@ Environment variables:
 2. **Compact after debugging** - Clear error-resolution context before continuing
 3. **Don't compact mid-implementation** - Preserve context for related changes
 4. **Read the suggestion** - The hook tells you *when*, you decide *if*
-
-## Related
-
-- [The Longform Guide](https://x.com/affaanmustafa/status/2014040193557471352) - Token optimization section
-- Memory persistence hooks - For state that survives compaction

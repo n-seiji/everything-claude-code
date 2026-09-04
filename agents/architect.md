@@ -111,7 +111,7 @@ For significant architectural decisions, create ADRs:
 # ADR-001: Use Redis for Semantic Search Vector Storage
 
 ## Context
-Need to store and query 1536-dimensional embeddings for semantic market search.
+Need to store and query 1536-dimensional embeddings for semantic product search.
 
 ## Decision
 Use Redis Stack with vector search capability.
@@ -183,66 +183,9 @@ Watch for these architectural anti-patterns:
 - **Tight Coupling**: Components too dependent
 - **God Object**: One class/component does everything
 
-## Project-Specific Architecture (Example)
+## Project-Specific Checks
 
-Example architecture for an AI-powered SaaS platform:
-
-### Current Architecture
-- **Frontend**: Next.js 15 (Vercel/Cloud Run)
-- **Backend**: FastAPI or Express (Cloud Run/Railway)
-- **Database**: PostgreSQL (Supabase)
-- **Cache**: Redis (Upstash/Railway)
-- **AI**: Claude API with structured output
-- **Real-time**: Supabase subscriptions
-
-### Key Design Decisions
-1. **Hybrid Deployment**: Vercel (frontend) + Cloud Run (backend) for optimal performance
-2. **AI Integration**: Structured output with Pydantic/Zod for type safety
-3. **Real-time Updates**: Supabase subscriptions for live data
-4. **Immutable Patterns**: Spread operators for predictable state
-5. **Many Small Files**: High cohesion, low coupling
-
-### Scalability Plan
-- **10K users**: Current architecture sufficient
-- **100K users**: Add Redis clustering, CDN for static assets
-- **1M users**: Microservices architecture, separate read/write databases
-- **10M users**: Event-driven architecture, distributed caching, multi-region
+Add checks specific to your project here, e.g. deployment topology, scaling
+thresholds, or required third-party integrations.
 
 **Remember**: Good architecture enables rapid development, easy maintenance, and confident scaling. The best architecture is simple, clear, and follows established patterns.
-
-## Agent Teams Protocol
-
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
-
-### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
-
-### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
-
-### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
-
-### Team Role: Design Validator
-- チーム内での役割: 設計の妥当性検証とアーキテクチャ決定
-- planner から受け取った計画の設計面をレビューする
-- 設計上の問題を発見したら planner に SendMessage で報告
-- ADR (Architecture Decision Record) が必要な場合、doc-updater にタスク作成を依頼
-
-### Team Compositions
-- **機能開発チーム**: planner の計画をレビュー → 設計承認 → tdd-guide に引き継ぎ
-- **リファクタリングチーム**: リファクタ対象の設計評価 → refactor-cleaner に安全な変更範囲を指示
-
-### Handoff Pattern
-1. 設計レビュー完了後、承認/修正要求を planner に SendMessage
-2. 承認した場合、実装タスクのブロック解除を TaskUpdate で実施
-3. 設計ドキュメントの更新が必要な場合、doc-updater にタスク作成

@@ -4,7 +4,7 @@
     "name": "n-seiji"
   },
   "metadata": {
-    "description": "n-seiji's personal Claude Code configurations (fork of affaan-m/everything-claude-code)"
+    "description": "n-seiji's personal Claude Code plugin marketplace"
   },
   "plugins": [
     {
@@ -13,9 +13,9 @@
         "source": "github",
         "repo": "n-seiji/everything-coding-agent"
       },
-      "description": "Complete collection of agents, skills, hooks, commands, and rules evolved over 10+ months of intensive daily use",
+      "description": "Agents, skills, slash commands, and hooks for Claude Code and Codex: planning, TDD, code and PR review, verification, and UI checks.",
       "author": {
-        "name": "Affaan Mustafa (forked by n-seiji)"
+        "name": "n-seiji"
       },
       "homepage": "https://github.com/n-seiji/everything-coding-agent",
       "repository": "https://github.com/n-seiji/everything-coding-agent",

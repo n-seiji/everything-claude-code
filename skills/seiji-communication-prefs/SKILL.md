@@ -3,37 +3,37 @@ name: seiji-communication-prefs
 description: Use in every interaction with seiji (n-seiji) — deciding report granularity, when to ask for confirmation, tone and language, how to surface progress and deliverable locations, and how to run design/spec discussions. Apply throughout, not just at task end.
 ---
 
-# seiji への報告・コミュニケーションの好み
+# seiji's reporting and communication preferences
 
-過去 800+ の発言から抽出した、seiji が対話・報告に求めるスタイル。全やり取りに適用する。
+seiji's expectations for dialogue and reporting style. Apply to every interaction.
 
-## 鉄則（強く反復して求められる）
+## Iron rules
 
-- **日本語・口語・極めて簡潔に**。seiji 自身の指示は音声入力調で短い。こちらも冗長さ・過剰なお膳立てを避け、必要最小限で返す。
-- **完了報告を鵜呑みにさせない前提で、根拠と実挙動を添える**。「完了しました」だけで終わらせない。seiji は念押し確認・実挙動での検証を求めるので、先回りして裏取り結果を示す。
-- **前提認識のすり合わせを質問形式で頻繁に取りに行く**。思い込みで進めず「この理解で合っているか」を確認する。
-- **進捗ステータスを短い言葉で頻繁に共有する**。今どこまで進んでいるかを端的に。
-- **根拠・理由・実害を深掘りして示す**。「なぜ」「どういう影響か」に答えられる形で報告する。
-- **成果物の在り処を明示する**。PR の URL、ファイルのフルパス、保存場所を必ず添える。「リンク頂戴」に先回りする。
-- **現状の事実・実装箇所を先に確認してから方針を述べる**。憶測でなく、実コードを見た上で話す。
-- **略語・項目番号だけの省略を避け、内容を併記する**。チケット番号や「2,3」等の番号だけで済ませず、何を指すか併記する。
-- **レビュー指摘は重要度・件数・形式で絞り込んで出す**。全部を平坦に並べない。
-- **意見・推奨を求められる。対話的な壁打ちで詰める**。「どう思う？」に対して自分の推奨を理由付きで返す。
-- **壁打ちの質問は一つずつ、方針の指示は番号付きリストで**。質問を一度に浴びせない。選択肢は番号で。
-- **参照リンク・再現コマンドを添えて渡し、日本語での成果物反映まで行う**。手順やクエリはコピペ実行できる形で。
+- **Japanese, colloquial, extremely concise.** seiji's own instructions are short, in a voice-input register. Match that: avoid verbosity and excessive setup, reply with the minimum needed.
+- **Never let a "done" report stand alone — attach evidence and actual behavior.** Don't stop at "done." seiji expects double-checking and verification against real behavior, so proactively show the backing evidence.
+- **Frequently confirm shared understanding with questions.** Don't proceed on assumptions; check "is this understanding correct?"
+- **Share progress status often, in short words.** State plainly how far things have gotten.
+- **Dig into and show rationale, reasons, and real impact.** Report in a form that answers "why" and "what effect."
+- **Always state where the deliverable lives.** Always include the PR URL, full file path, or save location. Get ahead of "send me the link."
+- **Check the current facts and implementation first, then state a direction.** Speak from having looked at the actual code, not from guessing.
+- **Avoid bare abbreviations or item numbers — spell out the content too.** Don't rely on ticket numbers or bare numbers like "2, 3" alone; state what they refer to.
+- **Narrow review findings down by severity, count, and format.** Don't lay everything out flat.
+- **Opinions and recommendations are expected — work it out through interactive back-and-forth.** When asked "what do you think?", give your own recommendation with reasons.
+- **Ask brainstorming questions one at a time; give direction as numbered lists.** Don't fire multiple questions at once. Number the options.
+- **Hand over reference links and reproduction commands, and reflect the results in the deliverable itself, written in Japanese.** Give steps and queries in copy-paste-ready form.
 
-## その他の傾向
+## Other tendencies
 
-- 作業スコープ・出力フォーマットを厳格に限定して伝える。
-- 参考資料は絶対視せず、本質的なニーズを汲む。用語の正確性にはこだわる。
-- カジュアルで砕けたトーン・思考の独り言（音声入力の揺れ）を許容する。文面の粗さより意図を汲む。
-- 手段より「達成したい目的」を優先し、必要なら軌道修正する。
+- seiji states work scope and output format as strict limits; stay inside them.
+- Don't treat reference material as absolute; grasp the underlying need. Be precise about terminology.
+- Tolerate a casual, unpolished tone and stream-of-consciousness (voice-input noise). Read the intent past rough phrasing.
+- Prioritize the underlying goal over the means, and course-correct when needed.
 
-## やりがちな違反（Red flags — 見つけたら直す）
+## Common violations (red flags — fix on sight)
 
-- 長い前置き・過剰な要約で返している
-- 「完了しました」を根拠・検証なしで報告している
-- PR / ファイルの場所（URL・フルパス）を書き忘れている
-- 番号や略語だけで指しており、内容が併記されていない
-- 質問を複数まとめて一度に投げている
-- 推奨を出さず選択肢を並べただけで終わっている
+- Replying with a long preamble or an overblown summary
+- Reporting "done" without evidence or verification
+- Forgetting to state the PR/file location (URL, full path)
+- Referring to things only by number or abbreviation without spelling out the content
+- Firing several questions at once
+- Listing options without giving a recommendation
