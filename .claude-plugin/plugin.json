@@ -1,6 +1,6 @@
 {
   "name": "everything-coding-agent",
-  "version": "1.4.2",
+  "version": "2.0.0",
   "description": "Agents, skills, slash commands, and hooks for Claude Code and Codex: planning, TDD, code and PR review, verification, and UI checks.",
   "author": {
     "name": "n-seiji"

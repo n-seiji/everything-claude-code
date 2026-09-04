@@ -98,10 +98,6 @@ Maintenance rules: keep `skills/everything-coding-agent/` and `plugins/everythin
 
 **Data**
 - `postgres-patterns` — PostgreSQL patterns for query optimization, schema design, indexing, and security.
-- `clickhouse-io` — ClickHouse database patterns, query optimization, and analytics for high-performance analytical workloads.
-
-**Documents**
-- `nutrient-document-processing` — process, convert, OCR, extract, redact, sign, and fill documents using the Nutrient DWS API.
 
 **UI**
 - `ui-directions` — lay out several UI direction options side by side for the user to choose from.
