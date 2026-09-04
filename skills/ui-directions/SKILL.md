@@ -10,8 +10,8 @@ description: Use when the user says 「デザインパターン提案して」�
 ## 手順
 
 1. **実値を先に集める（記憶で設計しない）**
-   - デザイントークン: `src/styles.css` の `@theme`（tailwind theme）
-   - primitive の実装: `src/components/*/variants.ts` と card / badge / button / field 本体
+   - デザイントークンの定義（例: Tailwind の `@theme`、`tokens.css`、theme ファイル）
+   - 共通 UI 部品（button / card / badge / field 等）の実装と variant 定義
    - 依頼に一番近い既存画面（header、sidebar、table）から正確な class / px を抜き出す
    - ユーザーが渡した legacy / 参考スクリーンショットは「構造の参考」としてのみ扱う（配色や角丸まで模倣しない）
 
@@ -21,7 +21,7 @@ description: Use when the user says 「デザインパターン提案して」�
    - 有力候補には「別の画面種別への適用例」artboard を 1 つ追加する（例: 一覧が主題なら設定フォームを 1 枚）。これで方向性が単発画面向けでなく汎用パターンであることを示す
 
 3. **artboard の作成は `design-mockup-author` subagent に委譲する**
-   - 渡すもの: トークン表（hex / px）、component anatomy、サンプルデータ（実際のカラム名・現実的な行データ）、各方向の spec、全 artboard で同一に複製する sidebar / header の内容、frame サイズ 1440×900、フォーマット規約への参照（`design` skill の SKILL.md「Authoring the seed .dc.html」「Quick syntax card」節）
+   - 渡すもの: トークン表（hex / px）、component anatomy、サンプルデータ（実際のカラム名・現実的な行データ）、各方向の spec、全 artboard で同一に複製する sidebar / header の内容、frame サイズ（例: desktop 1440×900）、フォーマット規約への参照（`design` skill の SKILL.md「Authoring the seed .dc.html」「Quick syntax card」節）
    - 成果物として要求するもの: 有力候補 = `Main.dc.html`、他方向 = `DirectionA.dc.html` / `DirectionB.dc.html` / …、各方向の上に狙い・トレードオフの注釈を持つ `canvas.json`
 
 4. **`design` skill のヘルパーで組み立てる**
@@ -29,7 +29,7 @@ description: Use when the user says 「デザインパターン提案して」�
    - ファイル名・title は検討中のデザイン名にする。`design.html` のような汎用名にしない
 
 5. **公開前に必ず目視する**
-   - Chrome extension は `file://` をブロックするため、seed した html のディレクトリで `python3 -m http.server <port>` を立て `http://localhost:<port>/<name>.html` を開く
+   - Chrome extension は `file://` をブロックするため、seed した html のディレクトリで静的サーバー（例: `python3 -m http.server <port>`）を立て `http://localhost:<port>/<name>.html` を開く
    - artboard は遅延マウントされ、サムネイルはしばらく白いままなので 10 秒ほど待つ
    - 各 artboard を展開（▷）してスクリーンショットし、明らかな不備（例: ボタンの折り返し → `white-space:nowrap; flex-shrink:0` を追加、ヘッダー文言の誤り）は `.dc.html` を直接編集して re-seed する
    - 確認後は必ず http server を kill する
@@ -41,7 +41,7 @@ description: Use when the user says 「デザインパターン提案して」�
 7. **決定後の再構成とコード化**
    - `pages` を使って re-seed する: page-1「採用: X」に Main + 適用例 + 決定理由（対象・型）のメモ、page-2「検討した案」に他の方向とそのメモ
    - 同じ path で republish する
-   - コード化: `.claude/rules/<area>-screens.md` に CORRECT/WRONG 付きのレシピ、判断基準の表、例外を書く
+   - コード化: リポジトリのルール置き場（例: `.claude/rules/<area>-screens.md`）に、正例 / 反例付きのレシピ、判断基準の表、例外を書く
    - primitive に昇格させるのは利用箇所が 2 つ以上あるものだけ。昇格の対象を増やす前に必ずユーザーに確認する
 
 ## 落とし穴
