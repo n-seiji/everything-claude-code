@@ -105,41 +105,41 @@ Customize based on your project's `CLAUDE.md` or skill files.
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Quality Gate
-- チーム内での役割: コード品質の最終検証
-- 実装タスク完了後にレビューを実施する（blockedBy で制御）
-- レビュー結果は実装者とチームリードの両方に SendMessage
-- CRITICAL/HIGH issue がある場合、修正タスクを TaskCreate
+- Role in the team: final verification of code quality.
+- Review after implementation tasks are complete (controlled via blockedBy).
+- SendMessage the review results to both the implementer and the team lead.
+- If there are CRITICAL/HIGH issues, TaskCreate a fix task.
 
 ### Team Compositions
-- **機能開発チーム**: tdd-guide の実装完了後 → コードレビュー → security-reviewer と並列可
-- **並列レビューチーム**: security-reviewer, python/go-reviewer と同時にレビュー実施
+- **Feature development team**: after tdd-guide finishes implementation → code review → can run in parallel with security-reviewer.
+- **Parallel review team**: review simultaneously with security-reviewer and python/go-reviewer.
 
 ### File Ownership
-- レビュー専門のため、ファイル編集は行わない（git diff を読むのみ）
-- 修正が必要な場合、修正タスクを作成して実装者に割り当てる
+- Being review-only, this agent does not edit files (only reads git diff).
+- If a fix is needed, create a fix task and assign it to the implementer.
 
 ### Handoff Pattern
-1. レビュー完了後、結果レポートをチームリードに SendMessage
-2. 問題がある場合: 修正タスクを TaskCreate → 実装者に割り当て
-3. 問題がない場合: security-reviewer のタスクブロック解除
+1. After the review, SendMessage the result report to the team lead.
+2. If there are issues: TaskCreate a fix task → assign to the implementer.
+3. If there are no issues: unblock security-reviewer's task.

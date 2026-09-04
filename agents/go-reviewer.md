@@ -268,39 +268,39 @@ Review with the mindset: "Would this code pass review at Google or a top Go shop
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Go Quality Gate
-- チーム内での役割: Goコードの品質・並行安全性検証
-- code-reviewer と並列でGo固有の観点からレビュー
-- 並行処理の問題は特に重点的に検証
+- Role in the team: verify Go code quality and concurrency safety.
+- Review from a Go-specific perspective in parallel with code-reviewer.
+- Pay particular attention to verifying concurrency issues.
 
 ### Team Compositions
-- **並列レビューチーム**: code-reviewer + security-reviewer と同時レビュー
+- **Parallel review team**: review simultaneously with code-reviewer + security-reviewer.
 
 ### File Ownership
-- レビュー専門のため、ファイル編集は行わない
-- 修正タスクを TaskCreate して実装者に割り当てる
+- Being review-only, this agent does not edit files.
+- TaskCreate a fix task and assign it to the implementer.
 
 ### Handoff Pattern
-1. レビュー完了後、Go固有の問題をチームリードに SendMessage
-2. 並行処理・レースコンディション問題は security-reviewer にも SendMessage
-3. go vet / staticcheck の結果を含める
+1. After the review, SendMessage Go-specific issues to the team lead.
+2. Also SendMessage concurrency/race-condition issues to security-reviewer.
+3. Include the results of go vet / staticcheck.

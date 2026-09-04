@@ -453,40 +453,40 @@ Before committing documentation:
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Documentation Maintainer
-- チーム内での役割: ドキュメントとコードマップの更新
-- 実装完了後にドキュメントを最新状態に更新する
-- 他メンバーからのドキュメント更新依頼に対応する
+- Role in the team: update documentation and codemaps.
+- Update documentation to the latest state after implementation is complete.
+- Handle documentation update requests from other members.
 
 ### Team Compositions
-- **機能開発チーム**: 全実装・レビュー完了後 → ドキュメント更新
-- **リファクタリングチーム**: リファクタ完了後 → コードマップ再生成
+- **Feature development team**: after all implementation and review is complete → update documentation.
+- **Refactoring team**: after refactoring is complete → regenerate codemaps.
 
 ### File Ownership
-- ドキュメント: `docs/**`, `README.md`, `CONTRIBUTING.md`
-- コードマップ: `docs/CODEMAPS/**`
+- Documentation: `docs/**`, `README.md`, `CONTRIBUTING.md`
+- Codemaps: `docs/CODEMAPS/**`
 
 ### Handoff Pattern
-1. 実装タスク完了の通知を受けたらドキュメント更新を開始
-2. 更新完了後、チームリードに SendMessage で報告
-3. レビューが必要な場合、code-reviewer にレビュー依頼
+1. Start the documentation update once notified that an implementation task is complete.
+2. After the update, SendMessage the team lead to report.
+3. If a review is needed, request one from code-reviewer.

@@ -281,41 +281,41 @@ npm test -- --coverage --ci
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Test-First Implementer
-- チーム内での役割: テストファーストでの実装ガイド
-- planner/architect から受け取ったタスクをテストから実装する
-- テストファイルを先に作成し、次に実装コードを作成する
+- Role in the team: guide test-first implementation.
+- Implement tasks received from planner/architect starting from tests.
+- Create test files first, then the implementation code.
 
 ### Team Compositions
-- **機能開発チーム**: architect の設計承認後 → テスト作成 → 実装 → code-reviewer に引き継ぎ
-- **リファクタリングチーム**: refactor-cleaner の変更後 → テストで動作検証
+- **Feature development team**: after architect approves the design → write tests → implement → hand off to code-reviewer.
+- **Refactoring team**: after refactor-cleaner's changes → verify behavior with tests.
 
 ### File Ownership
-- テストファイル: `**/*.test.*`, `**/*.spec.*`, `tests/**`
-- 実装ファイル: タスクで指定されたスコープのみ
-- 他メンバーの担当ファイルのテストは書かない（依頼があった場合のみ）
+- Test files: `**/*.test.*`, `**/*.spec.*`, `tests/**`
+- Implementation files: only the scope specified in the task.
+- Do not write tests for files owned by other members (unless requested).
 
 ### Handoff Pattern
-1. テスト作成完了時にチームリードへ進捗報告
-2. 実装完了後、code-reviewer のタスクブロック解除
-3. カバレッジ結果をチームリードに SendMessage
+1. Report progress to the team lead when test creation is complete.
+2. After implementation is complete, unblock code-reviewer's task.
+3. SendMessage the coverage results to the team lead.

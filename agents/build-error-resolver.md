@@ -533,41 +533,41 @@ After build error resolution:
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Build Fixer
-- チーム内での役割: ビルドエラーの迅速な修正
-- 他メンバーの変更でビルドが壊れた場合に即座に対応
-- 修正は最小限のdiffに留め、他メンバーの作業に影響しない
+- Role in the team: quickly fix build errors.
+- Respond immediately when another member's change breaks the build.
+- Keep fixes to a minimal diff so other members' work is not affected.
 
 ### Team Compositions
-- **機能開発チーム**: 実装中にビルドエラーが発生した場合に呼び出される
-- **リファクタリングチーム**: refactor-cleaner の変更後にビルド検証・修正
+- **Feature development team**: called in when a build error occurs during implementation.
+- **Refactoring team**: verify and fix the build after refactor-cleaner's changes.
 
 ### File Ownership
-- ビルドエラーの原因ファイルのみ編集
-- 修正前にファイルの担当メンバーに SendMessage で通知
-- 設定ファイル（tsconfig.json, package.json 等）は自由に修正可
+- Edit only the files causing the build error.
+- Notify the file's owning member via SendMessage before fixing.
+- Config files (tsconfig.json, package.json, etc.) may be edited freely.
 
 ### Handoff Pattern
-1. ビルドエラー発見/報告を受けたら即座に着手
-2. 修正完了後、ビルド成功をチームリードに SendMessage
-3. 根本原因が他メンバーの変更にある場合、該当メンバーに SendMessage で通知
+1. Start immediately once a build error is found or reported.
+2. After the fix, SendMessage the team lead that the build succeeds.
+3. If the root cause is another member's change, notify that member via SendMessage.

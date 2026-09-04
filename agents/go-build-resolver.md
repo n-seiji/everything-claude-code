@@ -369,40 +369,40 @@ Build errors should be fixed surgically. The goal is a working build, not a refa
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Go Build Fixer
-- チーム内での役割: Goビルドエラーの迅速な修正
-- build-error-resolver のGo特化版として動作
-- go build, go vet, staticcheck のエラーを修正
+- Role in the team: quickly fix Go build errors.
+- Operates as the Go-specific version of build-error-resolver.
+- Fix errors from go build, go vet, and staticcheck.
 
 ### Team Compositions
-- **リファクタリングチーム**: Go コードのリファクタ後にビルド修正
+- **Refactoring team**: fix the build after refactoring Go code.
 
 ### File Ownership
-- ビルドエラーの原因 `.go` ファイルのみ編集
-- `go.mod`, `go.sum` は自由に修正可
-- 修正前にファイルの担当メンバーに SendMessage で通知
+- Edit only the `.go` files causing the build error.
+- `go.mod` and `go.sum` may be edited freely.
+- Notify the file's owning member via SendMessage before fixing.
 
 ### Handoff Pattern
-1. ビルドエラー報告を受けたら即座に着手
-2. 修正完了後、`go build ./...` と `go vet ./...` の結果をチームリードに SendMessage
-3. 根本原因が他メンバーの変更にある場合、該当メンバーに SendMessage で通知
+1. Start immediately once a build error is reported.
+2. After the fix, SendMessage the team lead with the results of `go build ./...` and `go vet ./...`.
+3. If the root cause is another member's change, notify that member via SendMessage.

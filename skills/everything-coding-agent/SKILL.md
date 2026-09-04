@@ -213,5 +213,5 @@ user worktrees, uncommitted user changes, or unrelated branches.
 - `/everything-coding-agent:review-pr <GitHub PR URL or Issue URL>` - run the
   PR review workflow above.
 
-Plain-language requests such as "このPRをreview-prっぽくレビューして" should trigger
+Plain-language requests such as "このPRをreview-prっぽくレビューして" (review this PR review-pr style) should trigger
 the same workflow.

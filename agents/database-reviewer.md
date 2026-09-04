@@ -655,40 +655,40 @@ ORDER BY rank DESC;
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Database Specialist
-- チーム内での役割: データベース関連コードの品質検証
-- スキーマ変更、マイグレーション、クエリの最適化をレビュー
-- RLS ポリシーとセキュリティの検証
+- Role in the team: quality verification of database-related code.
+- Review schema changes, migrations, and query optimization.
+- Verify RLS policies and security.
 
 ### Team Compositions
-- **機能開発チーム**: DB関連の実装がある場合に並列レビュー参加
-- security-reviewer と連携してDBセキュリティを検証
+- **Feature development team**: join the parallel review when there is DB-related implementation.
+- Coordinate with security-reviewer to verify DB security.
 
 ### File Ownership
-- マイグレーション: `migrations/**`, `supabase/migrations/**`
-- スキーマ: `schema.*`, `prisma/schema.prisma`
+- Migrations: `migrations/**`, `supabase/migrations/**`
+- Schema: `schema.*`, `prisma/schema.prisma`
 
 ### Handoff Pattern
-1. DB関連のレビュー完了後、結果をチームリードに SendMessage
-2. パフォーマンス問題がある場合、修正タスクを TaskCreate
-3. security-reviewer にDB固有のセキュリティ情報を SendMessage で共有
+1. After the DB-related review, SendMessage the results to the team lead.
+2. If there is a performance issue, TaskCreate a fix task.
+3. Share DB-specific security information with security-reviewer via SendMessage.

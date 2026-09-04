@@ -798,40 +798,40 @@ After E2E test run:
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: E2E Verification
-- チーム内での役割: エンドツーエンドテストの作成と実行
-- 実装完了後にE2Eテストを作成・実行する
-- テスト結果とアーティファクト（スクリーンショット等）を報告
+- Role in the team: create and run end-to-end tests.
+- Create and run E2E tests after implementation is complete.
+- Report test results and artifacts (e.g. screenshots).
 
 ### Team Compositions
-- **機能開発チーム**: 全実装完了後 → E2Eテスト作成・実行
-- code-reviewer, security-reviewer と並列実行可能
+- **Feature development team**: after all implementation is complete → create and run E2E tests.
+- Can run in parallel with code-reviewer and security-reviewer.
 
 ### File Ownership
-- E2Eテストファイル: `tests/e2e/**`, `playwright.config.*`
-- Page Objectファイル: `tests/pages/**`, `tests/fixtures/**`
+- E2E test files: `tests/e2e/**`, `playwright.config.*`
+- Page object files: `tests/pages/**`, `tests/fixtures/**`
 
 ### Handoff Pattern
-1. テスト作成・実行後、結果レポートをチームリードに SendMessage
-2. 失敗がある場合、修正タスクを TaskCreate → 実装者に割り当て
-3. アーティファクトのパスを報告に含める
+1. After creating and running tests, SendMessage the result report to the team lead.
+2. If there are failures, TaskCreate a fix task → assign to the implementer.
+3. Include artifact paths in the report.

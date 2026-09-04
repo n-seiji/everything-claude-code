@@ -1,45 +1,45 @@
 ---
 name: ui-verify
-description: Use when the user says 「動作確認して」「スクショ撮って」「実機で見て」, after any UI change before reporting it done, or when writing a PR's 動作確認 section.
+description: Use when the user says 「動作確認して」「スクショ撮って」「実機で見て」 (check it works / take a screenshot / try it on the real app), after any UI change before reporting it done, or when writing a PR's 動作確認 (verification) section.
 ---
 
 # UI Verify
 
-実行中の web app を `ui-verifier` subagent 経由で実 Chrome 上で動作確認し、実測結果を PR / 報告に残す workflow。
+A workflow that verifies a running web app in real Chrome via the `ui-verifier` subagent, and records measured results in a PR / report.
 
-## 使うとき / 使わないとき
+## When to use it / when not to
 
-- レイアウト崩れ、フォーカス移動、ダイアログの開閉、ルーティング遷移など「実際に描画・操作して初めてわかること」に使う
-- unit test / component test の代替ではない。ロジックの正しさは既存テストで担保し、このスキルは「画面で見える事実」の確認に使う
+- Use it for things you can only learn by actually rendering and interacting: layout breakage, focus movement, dialog open/close, routing transitions
+- Not a substitute for unit/component tests. Logic correctness is covered by existing tests; this skill is for confirming "facts visible on screen"
 
-## 環境準備
+## Environment setup
 
-1. dev server がどの worktree を serve すべきか確認する（CORS でオリジンが絞られている場合、ポートを保持できるのは 1 worktree だけ）
-2. 既存の dev server を停止し、対象 worktree から background で起動する。ログは scratchpad に出す
-3. 確認後は元の worktree の dev server に戻し、その旨を報告に明記する
-4. 確認のために branch 切り替えや DB row の変更が必要な場合、切り替えた事実と元に戻したことを報告に残す
+1. Confirm which worktree the dev server should be serving (if CORS restricts the origin, only one worktree can hold the port)
+2. Stop the existing dev server and start it from the target worktree in the background. Send logs to the scratchpad
+3. After verification, switch the dev server back to the original worktree and note that explicitly in the report
+4. If a branch switch or DB row change was needed for verification, record both the switch and the fact that it was reverted in the report
 
-## `ui-verifier` subagent への依頼内容
+## What to request from the `ui-verifier` subagent
 
-以下を numbered list で明記して依頼する。
+Spell out the following as a numbered list in the request.
 
-1. URL・ポート
-2. ログイン状態（済みであること）
-3. 対象 worktree / branch
-4. チェック項目（番号付き）と、各項目の期待結果・測定すべき JS の事実（`getBoundingClientRect` 等）
+1. URL and port
+2. Login state (must already be logged in)
+3. Target worktree / branch
+4. Check items (numbered), each with the expected result and the JS fact to measure (e.g. `getBoundingClientRect`)
 
-## PR へのスクリーンショット添付
+## Attaching screenshots to a PR
 
-1. 接続済み Chrome で対象 PR ページを開く
-2. `find` で **new comment フォームに属する** `input[type=file]` を特定する（PR 本文編集フォームのものと混同しない）
-3. `file_upload` でアップロードし、「Uploading」の文字が消えるまで待つ
-4. `javascript_tool` でその textarea から `<img ... src="https://github.com/user-attachments/assets/...">` の行を読み取る
-5. textarea 内のそれらの行を消す（コメントは送信しない）
-6. 取得した画像 URL を使い、`gh pr comment --body-file` / `gh pr edit --body-file` でコメント・本文を投稿する
-7. tabs group を見失うことがあるため、途中で失敗したら `tabs_context_mcp {createIfEmpty: true}` を再実行する
+1. Open the target PR page in connected Chrome
+2. Use `find` to locate the `input[type=file]` that belongs to the **new comment form** (don't confuse it with the one in the PR body edit form)
+3. Upload it with `file_upload` and wait until the "Uploading" text disappears
+4. Use `javascript_tool` to read the `<img ... src="https://github.com/user-attachments/assets/...">` line from that textarea
+5. Delete those lines from the textarea (don't submit the comment)
+6. Use the obtained image URL to post the comment/body via `gh pr comment --body-file` / `gh pr edit --body-file`
+7. The tabs group can get lost; if something fails partway, re-run `tabs_context_mcp {createIfEmpty: true}`
 
-## PR への報告フォーマット
+## PR report format
 
-- 動作確認テーブル（`項目 / 結果 / 実測値`）
-- スクリーンショット
-- 自動化した確認 / 手動で確認した項目の内訳
+- A verification table (`Item / Result / Measured value`)
+- Screenshots
+- A breakdown of which checks were automated vs. done manually

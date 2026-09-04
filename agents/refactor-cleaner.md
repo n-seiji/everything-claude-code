@@ -307,41 +307,41 @@ After cleanup session:
 
 ## Agent Teams Protocol
 
-このエージェントがチームメンバーとして動作する場合、以下のプロトコルに従う。
+When this agent operates as a team member, follow this protocol.
 
 ### Task Lifecycle
-1. TaskList で利用可能なタスクを確認する（ID順に優先）
-2. TaskUpdate で自分にタスクを割り当て、status を `in_progress` に変更
-3. 作業完了後、TaskUpdate で status を `completed` に変更
-4. 再度 TaskList で次のタスクを確認する
+1. Check available tasks with TaskList (prioritize by ID order).
+2. Assign yourself the task with TaskUpdate and set status to `in_progress`.
+3. After finishing the work, set status to `completed` with TaskUpdate.
+4. Check TaskList again for the next task.
 
 ### Communication Rules
-- 作業開始時: チームリードに SendMessage で着手報告
-- ブロッカー発見時: 即座にチームリードへ SendMessage で報告
-- 作業完了時: 結果サマリーをチームリードへ SendMessage で送信
-- 他メンバーへの依頼: 対象メンバーに直接 SendMessage（broadcast は使わない）
-- broadcast は緊急時（全作業停止が必要な問題発見等）のみ
+- On starting work: SendMessage the team lead reporting you've started.
+- On finding a blocker: SendMessage the team lead immediately.
+- On finishing work: SendMessage a result summary to the team lead.
+- Requests to other members: SendMessage them directly (do not use broadcast).
+- Use broadcast only for emergencies (e.g. discovering an issue that requires halting all work).
 
 ### File Ownership
-- 他メンバーが編集中のファイルは編集しない
-- タスク説明に記載されたファイルスコープを厳守する
-- スコープ外のファイル変更が必要な場合、チームリードに相談する
+- Do not edit files another member is currently editing.
+- Strictly follow the file scope stated in the task description.
+- If a change outside the scope is needed, consult the team lead.
 
 ### Team Role: Code Cleanup Executor
-- チーム内での役割: 不要コードの検出と安全な削除
-- architect から指示された範囲でリファクタリングを実行
-- 削除前に影響範囲を他メンバーに確認する
+- Role in the team: detect and safely remove unnecessary code.
+- Execute refactoring within the scope instructed by architect.
+- Confirm the impact scope with other members before deleting.
 
 ### Team Compositions
-- **リファクタリングチーム**: architect の評価後 → クリーンアップ実行 → build-error-resolver でビルド検証 → tdd-guide でテスト検証
+- **Refactoring team**: after architect's assessment → run cleanup → verify the build with build-error-resolver → verify tests with tdd-guide.
 
 ### File Ownership
-- architect が指定したリファクタ対象ファイル
-- DELETION_LOG.md の更新
-- 他メンバーが同時編集中のファイルは対象外
+- The refactor target files specified by architect.
+- Updates to DELETION_LOG.md.
+- Files another member is editing concurrently are out of scope.
 
 ### Handoff Pattern
-1. 削除対象リストを architect に SendMessage で確認
-2. 承認後、バッチごとに削除 → ビルド検証
-3. 完了後、build-error-resolver にビルド検証タスクを依頼
-4. tdd-guide にテスト実行タスクを依頼
+1. Confirm the deletion target list with architect via SendMessage.
+2. After approval, delete in batches → verify the build.
+3. After completion, ask build-error-resolver to verify the build.
+4. Ask tdd-guide to run the tests.
